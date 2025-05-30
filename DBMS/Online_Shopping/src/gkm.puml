@@ -1,0 +1,65 @@
+@startuml
+top to bottom direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor #FDF6E3
+    BorderColor black
+}
+
+actor 用户
+actor 客服
+actor 物流人员
+
+rectangle "用户行为" {
+    usecase "注册" as UC1
+    usecase "登录" as UC2
+    usecase "浏览商品" as UC3
+    usecase "加入购物车" as UC5
+    usecase "结账付款" as UC6
+    usecase "查看物流" as UC10
+    usecase "确认收货并评价" as UC11
+}
+
+rectangle "结账流程细节" {
+    usecase "选择支付方式" as UC7
+    usecase "填写地址" as UC8
+    usecase "填写新地址" as UC9
+}
+
+rectangle "物流流程" {
+    usecase "配送订单" as UC12
+    usecase "更新物流状态" as UC13
+}
+
+rectangle "客服支持" {
+    usecase "联系客服" as UC4
+}
+
+' 用户主流程
+用户 --> UC1
+用户 --> UC2
+用户 --> UC3
+用户 --> UC5
+用户 --> UC6
+用户 --> UC10
+用户 --> UC11
+
+' 包含和扩展
+UC6 .> UC7 : <<include>>
+UC6 .> UC8 : <<include>>
+UC8 .> UC9 : <<extend>>
+UC3 .> UC4 : <<extend>>
+
+' 物流流程
+UC6 --> UC12
+UC12 --> UC13
+UC13 --> UC11
+
+' 客服与物流人员行为
+客服 --> UC4
+物流人员 --> UC12
+物流人员 --> UC13
+
+left to right direction
+@enduml

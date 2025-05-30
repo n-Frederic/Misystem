@@ -1,0 +1,65 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FDF6E3
+  BorderColor #657b83
+  ArrowColor #586e75
+  FontSize 12
+}
+
+actor 用户 as User
+actor 客服 as Support
+actor 物流人员 as Delivery
+
+rectangle "网上购物系统" {
+  usecase "注册" as UC1
+  usecase "登录" as UC2
+  usecase "浏览商品" as UC3
+  usecase "加入购物车" as UC4
+  usecase "结账付款" as UC5
+  usecase "填写地址" as UC6
+  usecase "填写新地址" as UC7
+  usecase "选择支付方式" as UC8
+  usecase "查看物流" as UC9
+  usecase "确认收货" as UC10
+  usecase "评价" as UC11
+  usecase "联系客服" as UC12
+
+  usecase "配送订单" as UC13
+  usecase "更新物流状态" as UC14
+
+  usecase "处理商品问题" as UC15
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC8
+User --> UC9
+User --> UC10
+User --> UC11
+
+UC2 --> UC3
+UC3 --> UC4
+UC4 --> UC5
+UC5 --> UC6
+UC5 --> UC8
+UC5 --> UC13
+UC13 --> UC14
+UC14 --> UC9
+UC9 --> UC10
+UC10 --> UC11
+
+UC6 .[#gray].> UC7 : <<extend>>
+UC3 .[#gray].> UC12 : <<extend>>
+
+UC12 --> Support
+Support --> UC15
+
+Delivery --> UC13
+Delivery --> UC14
+@enduml

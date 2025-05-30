@@ -1,0 +1,66 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam ArrowStyle Straight
+skinparam usecase {
+  BackgroundColor #FDF6E3
+  BorderColor Black
+  ArrowColor Gray
+}
+
+actor 用户 as Customer
+actor 商家 as Seller
+actor 客服 as Service
+
+rectangle "网上购物系统" {
+
+  (注册账号) as UC1
+  (登录系统) as UC2
+  (浏览商品) as UC3
+  (加入购物车) as UC4
+  (提交订单) as UC5
+  (填写收货地址) as UC6
+  (选择支付方式) as UC7
+  (确认收货) as UC8
+  (评价商品) as UC9
+  (联系客服) as UC10
+  (处理售后问题) as UC11
+  (使用优惠券) as UC17
+
+    ' 商家
+  (发布商品) as UC12
+  (修改商品信息) as UC13
+  (查看订单) as UC14
+  (发货) as UC15
+  (发放优惠券) as UC18
+
+  (处理用户咨询) as UC16
+
+  ' 用户行为
+  Customer --> UC1
+  Customer --> UC2
+  Customer --> UC3
+  Customer --> UC4
+  Customer --> UC5
+  Customer --> UC8
+  Customer --> UC9
+  Customer --> UC10
+
+  UC5 --> UC6 : <include>
+  UC5 --> UC7 : <include>
+  UC10 --> UC11 : <extend>
+  UC5 --> UC17 : <extend>
+
+  ' 商家行为
+  Seller --> UC12
+  Seller --> UC13
+  Seller --> UC14
+  Seller --> UC15
+  Seller -->UC18
+
+  ' 客服行为
+  Service --> UC16
+  Service --> UC11
+}
+
+left to right direction
+@enduml

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="GBK">
+    <file url="file://$PROJECT_DIR$/src/HTMLSalesFormatter.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/SL275/M9/Ex3/Account.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/SL275/M9/Ex3/Bank.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/SL275/M9/Ex3/CustomerReport.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/SL275/M9/Ex4/Bank.java" charset="GBK" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

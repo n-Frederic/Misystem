@@ -1,0 +1,37 @@
+@startuml
+skinparam BackgroundColor #FAFAFA
+skinparam ArrowColor Black
+skinparam ActivityBorderColor Gray
+skinparam ActivityBackgroundColor #FFFCE0
+skinparam DiamondBackgroundColor #F0F0F0
+
+start
+
+:用户注册或登录;
+
+:浏览商品;
+repeat
+  :加入购物车;
+repeat while (继续购物?)
+
+:提交订单;
+:选择优惠券;
+:填写收货地址;
+:选择支付方式;
+:支付订单;
+
+partition 商家 {
+  :确认订单;
+  :发货;
+}
+
+:确认收货;
+:评价商品;
+
+if (商品有问题?) then (是)
+  :联系客服;
+  :客服处理售后;
+endif
+
+stop
+@enduml

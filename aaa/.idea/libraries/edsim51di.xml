@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="edsim51di">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/edsim51di.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
