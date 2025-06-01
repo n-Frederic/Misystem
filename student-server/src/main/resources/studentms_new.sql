@@ -122,7 +122,7 @@ INSERT INTO `sct` VALUES (13, 4, 8, 4, 10, '25-春季学期');
 INSERT INTO `sct` VALUES (14, 4, 7, 4, NULL, '25-春季学期');
 INSERT INTO `sct` VALUES (15, 4, 10, 13, NULL, '25-春季学期');
 INSERT INTO `sct` VALUES (16, 1, 8, 4, NULL, '25-春季学期');
-INSERT INTO `sct` VALUES (17, 1, 10, 13, NULL, '22-春季学期');
+INSERT INTO `sct` VALUES (17, 1, 10, 13, NULL, '25-春季学期');
 
 -- ----------------------------
 -- Table structure for t
