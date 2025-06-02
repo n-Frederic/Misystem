@@ -29,6 +29,7 @@ import queryCourseTeacher from "@/views/Admin/selectCourseManage/queryCourseTeac
 import studentSelectCourseManage from "@/views/Student/selectCourse/index";
 import selectCourse from "@/views/Student/selectCourse/selectCourse";
 import querySelectedCourse from "@/views/Student/selectCourse/querySelectedCourse";
+import StudentCourse from "@/views/Student/selectCourse/StudentCourse";
 import studentCourseGrade from "@/views/Student/courseGrade/index";
 import queryCourseGrade from "@/views/Student/courseGrade/queryCourseGrade";
 import queryGradeCourse from "@/views/Admin/gradeCourseManage/queryGradeCourse";
@@ -342,6 +343,12 @@ const routes = [
             path: '/querySelectedCourse',
             name: '查询课表',
             component: querySelectedCourse,
+            meta: {requireAuth: true}
+          },
+          {
+            path: '/StudentCourse',
+            name: '选课课表',
+            component: StudentCourse,
             meta: {requireAuth: true}
           }
         ]

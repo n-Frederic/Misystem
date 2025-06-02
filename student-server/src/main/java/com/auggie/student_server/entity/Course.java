@@ -14,4 +14,9 @@ public class Course {
     private Integer cid;
     private String cname;
     private Integer ccredit;
+    private Integer day;
+    private Integer period;
+    private Integer capacity;
+    private Integer selected;
+    private String location;
 }

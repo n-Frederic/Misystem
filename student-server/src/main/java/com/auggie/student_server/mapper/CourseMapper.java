@@ -10,12 +10,13 @@ import java.util.List;
 @Repository
 @Mapper
 public interface CourseMapper {
-//    select
+
     public List<Course> findBySearch(@Param("cid") Integer cid,
                                      @Param("cname") String cname, @Param("fuzzy") Integer fuzzy,
                                      @Param("lowBound") Integer lowBound, @Param("highBound") Integer highBound);
 
-//    insert
+
+    //    insert
     public boolean insertCourse(@Param("course") Course course);
 
 //    update
