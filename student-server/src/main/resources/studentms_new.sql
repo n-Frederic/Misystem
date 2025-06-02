@@ -14,7 +14,7 @@
  Date: 01/06/2025 17:09:20
 */
 
--- 设置字符编码和关闭外键检查
+-- 设置字符集及关闭外键检查
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -45,19 +45,22 @@ CREATE TABLE `c` (
                      `ccredit` TINYINT DEFAULT NULL,
                      `day` INT NOT NULL,
                      `period` INT NOT NULL,
+                     `capacity` INT DEFAULT 30,
+                     `selected` INT DEFAULT 0,
+                     `location` VARCHAR(50) DEFAULT NULL,
                      PRIMARY KEY (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `c` VALUES
-                    (7, '数据结构', 3, 1, 1),
-                    (8, '数据库系统', 3, 1, 4),
-                    (9, '计算机网络', 3, 1, 5),
-                    (10, '计算机组成原理', 3, 1, 6),
-                    (11, '软件工程导论', 1, 1, 7),
-                    (12, '离散数学', 3, 2, 1),
-                    (13, '人工智能基础', 2, 2, 2),
-                    (14, '程序设计基础', 3, 2, 4),
-                    (15, '大数据概论', 2, 2, 6);
+INSERT INTO `c` (`cid`, `cname`, `ccredit`, `day`, `period`, `capacity`, `selected`, `location`) VALUES
+                                                                                                     (7, '数据结构', 3, 1, 1, 40, 0, 'YF505'),
+                                                                                                     (8, '数据库系统', 3, 1, 4, 50, 0, 'YF409'),
+                                                                                                     (9, '计算机网络', 3, 1, 5, 30, 0, 'YF312'),
+                                                                                                     (10, '计算机组成原理', 3, 1, 6, 60, 0, 'YF404'),
+                                                                                                     (11, '软件工程导论', 1, 1, 7, 20, 0, NULL),
+                                                                                                     (12, '离散数学', 3, 2, 1, 40, 0, 'YF610'),
+                                                                                                     (13, '人工智能基础', 2, 2, 2, 50, 0, 'SD107'),
+                                                                                                     (14, '程序设计基础', 3, 2, 4, 30, 0, 'DQ408'),
+                                                                                                     (15, '大数据概论', 2, 2, 6, 30, 0, 'YF501');
 
 -- -------------------------------------
 -- 3. 学生表 s
@@ -121,6 +124,19 @@ CREATE TABLE `sct` (
                        FOREIGN KEY (`tid`) REFERENCES `t`(`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 插入前先建触发器
+DROP TRIGGER IF EXISTS `after_sct_insert`;
+DELIMITER //
+CREATE TRIGGER `after_sct_insert`
+    AFTER INSERT ON `sct`
+    FOR EACH ROW
+BEGIN
+    UPDATE `c` SET `selected` = `selected` + 1 WHERE `cid` = NEW.`cid`;
+END;
+//
+DELIMITER ;
+
+-- 插入数据（插入后会自动更新课程的 selected 字段）
 INSERT INTO `sct` VALUES
                       (10, 2, 8, 4, 2, '25-春季学期'),
                       (11, 2, 10, 13, NULL, '25-春季学期'),
@@ -131,5 +147,6 @@ INSERT INTO `sct` VALUES
                       (16, 1, 8, 4, NULL, '25-春季学期'),
                       (17, 1, 10, 13, NULL, '25-春季学期');
 
--- 恢复外键检查
+-- 开启外键检查
 SET FOREIGN_KEY_CHECKS = 1;
+
