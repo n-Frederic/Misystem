@@ -8,13 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/9 13:45
- * @Description: CourseController
- * @Version 1.0.0
- */
-
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/course")

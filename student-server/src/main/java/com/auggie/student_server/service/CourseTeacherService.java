@@ -10,13 +10,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/10 16:50
- * @Description: CourseTeacherService
- * @Version 1.0.0
- */
-
 @Service
 public class CourseTeacherService {
     @Autowired

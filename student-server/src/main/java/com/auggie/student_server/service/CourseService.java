@@ -10,12 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/9 13:46
- * @Description: CourseService
- * @Version 1.0.0
- */
 
 @Service
 public class CourseService {

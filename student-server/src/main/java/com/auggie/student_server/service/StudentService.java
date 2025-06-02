@@ -9,12 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/9 08:27
- * @Description: StudentService
- * @Version 1.0.0
- */
 
 @Service
 public class StudentService {

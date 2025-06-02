@@ -4,7 +4,7 @@
       <el-header>
         <div style="text-align: center; font-size: 25px; font-weight: bolder">
           <i class="el-icon-s-home" style="margin-right: 25px"></i>
-          选课管理系统
+          学生选课管理系统
         </div>
       </el-header>
 

@@ -11,12 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/10 20:10
- * @Description: SCTService
- * @Version 1.0.0
- */
 
 @Service
 public class SCTService {

@@ -12,12 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/10 16:43
- * @Description: CourseTeacherMapper
- * @Version 1.0.0
- */
 @Repository
 @Mapper
 public interface CourseTeacherMapper {

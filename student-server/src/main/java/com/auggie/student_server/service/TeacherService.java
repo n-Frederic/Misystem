@@ -11,13 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/9 10:55
- * @Description: TeacherService
- * @Version 1.0.0
- */
-
 @Service
 public class TeacherService {
     @Autowired

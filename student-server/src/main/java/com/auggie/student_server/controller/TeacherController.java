@@ -9,13 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Auther: auggie
- * @Date: 2022/2/9 11:02
- * @Description: TeacherController
- * @Version 1.0.0
- */
-
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/teacher")
@@ -43,7 +36,7 @@ public class TeacherController {
 
     @GetMapping("/findById/{tid}")
     public Teacher findById(@PathVariable("tid") Integer tid) {
-        System.out.println("正在查询学生信息 By id " + tid);
+        System.out.println("正在查询教师信息 By id " + tid);
         return teacherService.findById(tid);
     }
 
