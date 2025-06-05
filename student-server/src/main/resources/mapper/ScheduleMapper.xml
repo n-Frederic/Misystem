@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auggie.student_server.mapper.ScheduleMapper">
+
+    <select id="getStudentSchedule" resultType="com.auggie.student_server.entity.CourseDTO">
+        SELECT
+            c.cid,
+            c.cname,
+            t.tname,
+            c.location,
+            c.day,
+            c.period
+        FROM sct
+                 JOIN c ON sct.cid = c.cid
+                 JOIN t ON sct.tid = t.tid
+        WHERE sct.sid = #{sid} AND sct.term = #{term}
+    </select>
+
+</mapper>
