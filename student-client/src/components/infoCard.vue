@@ -1,6 +1,6 @@
 <template>
   <el-card>
-    <el-descriptions title="用户信息" border>
+    <el-descriptions title="用户信息" border direction="vertical">
       <el-descriptions-item label="用户 id">{{ id }}</el-descriptions-item>
       <el-descriptions-item label="用户名">{{ name }}</el-descriptions-item>
       <el-descriptions-item label="用户类型">
@@ -17,9 +17,11 @@ export default {
   data() {
     return {
       id:
-        sessionStorage.getItem("type") === "teacher"
-          ? sessionStorage.getItem("tid")
-          : sessionStorage.getItem("sid"),
+          sessionStorage.getItem("type") === "teacher"
+              ? sessionStorage.getItem("tid")
+              : sessionStorage.getItem("type") === "student"
+                  ? sessionStorage.getItem("sid")
+                  : "admin",
       name: sessionStorage.getItem("name"),
       type: sessionStorage.getItem("type"),
     };

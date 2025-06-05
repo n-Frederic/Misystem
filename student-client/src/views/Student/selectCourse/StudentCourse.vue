@@ -19,7 +19,10 @@
       </div>
 
       <div class="schedule-row" v-for="(session, sessionIndex) in sessionsOfDay" :key="sessionIndex">
-        <div class="schedule-cell session-header">{{ session }}</div>
+        <div class="schedule-cell session-header">
+          <div class="session-name">{{ session.name }}</div>
+          <div class="session-time">{{ session.time }}</div>
+        </div>
         <div
             class="schedule-cell course-cell"
             v-for="(day, dayIndex) in daysOfWeek"
@@ -52,10 +55,16 @@ export default {
         {label: '2024-2025学年第一学期', value: '2024-2025-1'},
         {label: '2024-2025学年第二学期', value: '2024-2025-2'},
       ],
-      daysOfWeek: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-      sessionsOfDay: ['第1节', '第2节', '第3节', '第4节', '第5节', '第6节', '第7节'],
-      // 存储课表数据，key: '星期索引-节次索引', value: {cname, tname}
-      // 例如：'0-0': {cname: '数据结构', tname: '张老师'} 表示周一第一节课
+      daysOfWeek: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
+      sessionsOfDay: [
+        { name: '第1节', time: '08:00~09:50' },
+        { name: '第2节', time: '10:10~12:00' },
+        { name: '第3节', time: '12:10~14:00' },
+        { name: '第4节', time: '14:10~16:00' },
+        { name: '第5节', time: '16:20~18:10' },
+        { name: '第6节', time: '19:00~20:50' },
+        { name: '第7节', time: '21:00~21:50' },
+      ],
       scheduleData: {},
     };
   },
@@ -176,10 +185,25 @@ export default {
   background-color: #FAFAFA;
 }
 
-.day-header, .session-header {
+.day-header{
   background-color: #F5F7FA;
   font-weight: bold;
   color: #303133;
+}
+
+.session-header {
+  display: flex;
+  flex-direction: column;
+  background-color: #F5F7FA;
+  font-size: 12px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.session-time {
+  color: #888888;
+  font-size: 10px;
+  margin-top: 2px;
 }
 
 .course-cell {
@@ -191,21 +215,23 @@ export default {
 
 .course-cell:hover {
   background-color: #F2F6FC;
+  text-align: left;
 }
 
-.course-name {
-  font-weight: bold;
-  color: #409EFF; /* El-ElementUI 主题蓝 */
-  margin: 0;
-  line-height: 1.3;
+.course-id, .course-name, .teacher-name, .location {
+  color: black;
+  font-weight: normal;
+  font-family: 'SimSun', serif;
+  line-height: 1.5;
+  margin: 5px 0;
+  text-align: left;
 }
 
-.teacher-name {
-  color: #606266;
-  font-size: 0.9em;
-  margin: 5px 0 0;
-  line-height: 1.2;
+.location {
+  color: #888888;
 }
+
+
 
 .no-course {
   color: #C0C4CC;
