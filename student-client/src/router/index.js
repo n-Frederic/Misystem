@@ -31,6 +31,8 @@ import selectCourse from "@/views/Student/selectCourse/selectCourse";
 import querySelectedCourse from "@/views/Student/selectCourse/querySelectedCourse";
 import StudentCourse from "@/views/Student/selectCourse/StudentCourse";
 import studentCourseGrade from "@/views/Student/courseGrade/index";
+import MyExam from "@/views/Student/My-Exam/index";
+import queryExam from "@/views/Student/My-Exam/queryExam.vue";
 import queryCourseGrade from "@/views/Student/courseGrade/queryCourseGrade";
 import queryGradeCourse from "@/views/Admin/gradeCourseManage/queryGradeCourse";
 import editorGradeCourse from "@/views/Admin/gradeCourseManage/editorGradeCourse";
@@ -351,6 +353,20 @@ const routes = [
             component: StudentCourse,
             meta: {requireAuth: true}
           }
+        ]
+      },
+      {
+        path: '/My-Exam',
+        name: '我的考试',
+        component: MyExam,
+        meta: {requireAuth: true},
+        children: [
+          {
+            path: '/queryExam',
+            name: '考试安排',
+            component: queryExam,
+            meta: {requireAuth: true}
+          },
         ]
       },
       {
