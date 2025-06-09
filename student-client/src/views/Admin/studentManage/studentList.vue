@@ -46,12 +46,39 @@
         @current-change="changePage"
     >
     </el-pagination>
+    <div style="margin-top: 30px;">
+      <el-button type="primary" @click="exportExcel">导出 Excel</el-button>
+    </div>
   </div>
 </template>
 
 <script>
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 export default {
   methods: {
+    exportExcel() {
+      const data = this.tableData.map(s => ({
+        学号: s.sid,
+        姓名: s.sname,
+        密码: s.password
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "学生信息");
+
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array"
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream"
+      });
+      saveAs(blob, "学生信息表.xlsx");
+    },
     deleteStudent(row) {
       const that = this
       axios.get('http://localhost:10086/student/deleteById/' + row.sid).then(function (resp) {
@@ -64,12 +91,10 @@ export default {
           console.log(that.tmpList === null)
           if (that.tmpList === null) {
             window.location.reload()
-          }
-          else {
+          } else {
             that.$router.push('/queryStudent')
           }
-        }
-        else {
+        } else {
           that.$message({
             showClose: true,
             message: '删除出错，请查询数据库连接',
@@ -91,8 +116,7 @@ export default {
         axios.get('http://localhost:10086/student/findByPage/' + page + '/' + that.pageSize).then(function (resp) {
           that.tableData = resp.data
         })
-      }
-      else {
+      } else {
         let that = this
         let start = page * that.pageSize, end = that.pageSize * (page + 1)
         let length = that.tmpList.length
@@ -135,8 +159,7 @@ export default {
       axios.get('http://localhost:10086/student/findByPage/0/' + that.pageSize).then(function (resp) {
         that.tableData = resp.data
       })
-    }
-    else {
+    } else {
       // 从查询页跳转并且含查询
       console.log('正在查询跳转数据')
       console.log(this.ruleForm)
