@@ -14,13 +14,13 @@
           style="width: 100%">
         <el-table-column
             fixed
-            prop="cid"
+            prop="cno"
             label="课号"
             width="150">
         </el-table-column>
         <el-table-column
             prop="cname"
-            label="课程号"
+            label="课程名"
             width="150">
         </el-table-column>
         <el-table-column

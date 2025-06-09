@@ -13,8 +13,8 @@
             <el-form-item label="教师模糊查询">
               <el-switch v-model="ruleForm.tFuzzy"></el-switch>
             </el-form-item>
-            <el-form-item label="课程号" prop="cid">
-              <el-input v-model.number="ruleForm.cid"></el-input>
+            <el-form-item label="课程号" prop="cno">
+              <el-input v-model.number="ruleForm.cno"></el-input>
             </el-form-item>
             <el-form-item label="课程名" prop="cname">
               <el-input v-model.number="ruleForm.cname"></el-input>
@@ -42,7 +42,7 @@ export default {
     return {
       ruleForm: {
         tid: null,
-        cid: null,
+        cno: null,
         cname: null,
         tname: null,
         tFuzzy: true,
@@ -52,7 +52,7 @@ export default {
         tid: [
           { type: 'number', message: '必须是数字类型' }
         ],
-        cid: [
+        cno: [
           { type: 'number', message: '必须是数字类型' }
         ],
       }

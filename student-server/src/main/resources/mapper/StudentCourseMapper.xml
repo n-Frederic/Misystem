@@ -2,19 +2,24 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auggie.student_server.mapper.StudentCourseTeacherMapper">
+<mapper namespace="com.auggie.student_server.mapper.StudentCourseMapper">
     <select id="findByStudentId" resultType="CourseTeacherInfo">
-        SELECT c.cid, c.cname, t.tid, t.tname, sct.grade, c.ccredit
-        FROM studentms.sct sct INNER JOIN studentms.t t ON sct.tid = t.tid
-                INNER JOIN studentms.c c ON sct.cid = c.cid
-        WHERE sct.sid = #{sid} AND sct.term = #{term}
+        SELECT c.cid, c.cname, t.tid, t.tname, sc.daily_grade, c.ccredit
+        FROM studentms.sc sc
+                 INNER JOIN studentms.s s ON sc.sid = s.sid
+                 INNER JOIN studentms.ct ct ON sc.cno = ct.cno
+                 INNER JOIN studentms.c c ON ct.cid = c.cid
+                 INNER JOIN studentms.t t ON ct.tid = t.tid
+        WHERE sc.sid = #{sid} AND sc.term = #{term}
     </select>
 
-    <select id="findBySearch" resultType="SCTInfo">
-        SELECT c.cid, c.cname, t.tid, t.tname, s.sid, s.sname, sct.grade, sct.term
-        FROM studentms.sct sct INNER JOIN studentms.s s ON sct.sid = s.sid
-                INNER JOIN studentms.t t ON sct.tid = t.tid
-                INNER JOIN studentms.c c ON sct.cid = c.cid
+    <select id="findBySearch" resultType="scInfo">
+        SELECT c.cid, c.cname, t.tid, t.tname, s.sid, s.sname, sc., sc.term
+        FROM studentms.sc sc
+                INNER JOIN studentms.s s ON sc.sid = s.sid
+                INNER JOIN studentms.ct ct ON sc.cno = ct.cno
+                INNER JOIN studentms.c c ON ct.cid = c.cid
+                INNER JOIN studentms.t t ON ct.tid = t.tid
         <where>
             <if test="sid != null">
                 s.sid = #{sid}
@@ -50,13 +55,13 @@
                 </if>
             </if>
             <if test="term != null">
-                AND sct.term = #{term}
+                AND sc.term = #{term}
             </if>
             <if test="lowBound != null">
-                AND sct.grade >= #{lowBound}
+                AND sc.grade >= #{lowBound}
             </if>
             <if test="highBound != null">
-                AND #{highBound} >= sct.grade
+                AND #{highBound} >= sc.grade
             </if>
         </where>
     </select>

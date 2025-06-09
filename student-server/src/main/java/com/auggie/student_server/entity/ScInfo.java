@@ -5,15 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.type.Alias;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Alias("StudentCourseTeacher")
-public class StudentCourseTeacher {
-    private Integer sctid;
+@Alias("ScInfo")
+public class ScInfo {
     private Integer sid;
-    private Integer cid;
-    private Integer tid;
-    private Float grade;
-    private String term;
+    private Integer cno;
+    private Float dailyGrade;
+    private Float finalGrade;
+
+
 }

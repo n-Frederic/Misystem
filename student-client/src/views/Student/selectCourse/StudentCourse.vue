@@ -29,7 +29,7 @@
             :key="dayIndex"
         >
           <div v-if="getCourseInfo(dayIndex, sessionIndex)">
-            <p class="course-id">{{ getCourseInfo(dayIndex, sessionIndex).cid }}</p>
+            <p class="course-id">{{ getCourseInfo(dayIndex, sessionIndex).cno }}</p>
             <p class="course-name">{{ getCourseInfo(dayIndex, sessionIndex).cname }}</p>
             <p class="teacher-name">{{ getCourseInfo(dayIndex, sessionIndex).tname }}</p>
             <p class="location">{{ getCourseInfo(dayIndex, sessionIndex).location }}</p>
@@ -101,7 +101,7 @@ export default {
             const key = `${dayIndex}-${sessionIndex}`;
 
             that.$set(that.scheduleData, key, {
-              cid: course.cid,
+              cno: course.cno,
               cname: course.cname,
               tname: course.tname,
               location: course.location

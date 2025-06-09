@@ -7,13 +7,13 @@
           style="width: 100%">
         <el-table-column
             fixed
-            prop="cid"
-            label="课号"
+            prop="cno"
+            label="课程号"
             width="150">
         </el-table-column>
         <el-table-column
             prop="cname"
-            label="课程号"
+            label="课程名"
             width="150">
         </el-table-column>
         <el-table-column
@@ -105,11 +105,11 @@ export default {
   },
   methods: {
     deleteSCT(row) {
-      const cid = row.cid
+      const cno = row.cno
       const tid = row.tid
       const sid = sessionStorage.getItem('sid')
       const term = sessionStorage.getItem('currentTerm')
-      const sct = { cid, tid, sid, term }
+      const sct = { cno, tid, sid, term }
 
       const that = this
       axios.post('http://localhost:10086/SCT/deleteBySCT', sct).then(function (resp) {

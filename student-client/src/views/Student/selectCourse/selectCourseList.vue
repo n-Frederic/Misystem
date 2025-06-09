@@ -8,13 +8,13 @@
         style="width: 100%">
       <el-table-column
           fixed
-          prop="cid"
+          prop="cno"
           label="课号"
           width="150">
       </el-table-column>
       <el-table-column
           prop="cname"
-          label="课程号"
+          label="课程名"
           width="150">
       </el-table-column>
       <el-table-column
@@ -60,12 +60,12 @@ export default {
   methods: {
     select(row) {
       console.log(row)
-      const cid = row.cid
+      const cno = row.cno
       const tid = row.tid
       const sid = sessionStorage.getItem('sid')
       const term = sessionStorage.getItem('currentTerm')
       const sct = {
-        cid: cid,
+        cno: cno,
         tid: tid,
         sid: sid,
         term: term
@@ -138,6 +138,7 @@ export default {
         that.tmpList = null
         that.total = null
         that.tableData = null
+
         axios.post("http://localhost:10086/courseTeacher/findCourseTeacherInfo", newRuleForm).then(function (resp) {
           that.tmpList = resp.data
           that.total = resp.data.length
@@ -146,6 +147,22 @@ export default {
           let ans = (end < length) ? end : length
           that.tableData = that.tmpList.slice(start, ans)
         })
+
+          console.log("=== 详细数据调试 ===");
+          if (that.tmpList && that.tmpList.length > 0) {
+              that.tmpList.forEach((item, index) => {
+                  console.log(`记录 ${index + 1}:`, {
+                      cno: item.cno,
+                      cid: item.cid,
+                      cname: item.cname,
+                      tid: item.tid,
+                      tname: item.tname,
+                      ccredit: item.ccredit,
+                      term: item.term,
+                      完整对象: item
+                  });
+              });
+          }
       },
       deep: true,
       immediate: true

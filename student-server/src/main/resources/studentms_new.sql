@@ -86,67 +86,97 @@ INSERT INTO `s` VALUES
                     (10, '郑十二', 'vue123');
 
 -- -------------------------------------
--- 4. 课程-教师-学期表 ct
--- -------------------------------------
+
+-- 删除并重建 ct 表，添加 cno 作为主键
 DROP TABLE IF EXISTS `ct`;
 CREATE TABLE `ct` (
-                      `ctid` INT NOT NULL AUTO_INCREMENT,
-                      `cid` INT,
-                      `tid` INT,
-                      `term` VARCHAR(30) NOT NULL,
-                      PRIMARY KEY (`ctid`),
+                      `cno` INT NOT NULL,                    -- 开课编号，作为主键
+                      `cid` INT,                             -- 课程ID
+                      `tid` INT,                             -- 教师ID
+                      `term` VARCHAR(30) NOT NULL,           -- 学期
+                      PRIMARY KEY (`cno`),
                       FOREIGN KEY (`cid`) REFERENCES `c`(`cid`),
                       FOREIGN KEY (`tid`) REFERENCES `t`(`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `ct` VALUES
-                     (1, 8, 4, '25-春季学期'),
-                     (2, 7, 4, '25-春季学期'),
-                     (3, 10, 13, '25-春季学期'),
-                     (4, 9, 13, '25-春季学期'),
-                     (5, 11, 4, '25-春季学期'),
-                     (6, 9, 4, '25-秋季学期');
+-- 插入数据到 ct 表（使用 cno 作为主键）
+INSERT INTO `ct` (`cno`, `cid`, `tid`, `term`) VALUES
+                                                   (2001, 8, 4, '25-春季学期'),    -- 数据库系统-陈旭东-25春季
+                                                   (2002, 7, 4, '25-春季学期'),    -- 数据结构-陈旭东-25春季
+                                                   (2003, 10, 13, '25-春季学期'),  -- 计算机组成原理-刘铎-25春季
+                                                   (2004, 9, 13, '25-春季学期'),   -- 计算机网络-刘铎-25春季
+                                                   (2005, 11, 4, '25-春季学期'),   -- 软件工程导论-陈旭东-25春季
+                                                   (2006, 9, 4, '25-秋季学期');    -- 计算机网络-陈旭东-25秋季
 
--- -------------------------------------
--- 5. 学生选课表 sct
--- -------------------------------------
-DROP TABLE IF EXISTS `sct`;
-CREATE TABLE `sct` (
-                       `sctid` INT NOT NULL AUTO_INCREMENT,
-                       `sid` INT,
-                       `cid` INT,
-                       `tid` INT,
-                       `grade` FLOAT DEFAULT NULL,
-                       `term` VARCHAR(30) DEFAULT NULL,
-                       PRIMARY KEY (`sctid`),
-                       FOREIGN KEY (`sid`) REFERENCES `s`(`sid`),
-                       FOREIGN KEY (`cid`) REFERENCES `c`(`cid`),
-                       FOREIGN KEY (`tid`) REFERENCES `t`(`tid`)
+-- 创建新的 sc 表（学生选课表）
+DROP TABLE IF EXISTS `sc`;
+CREATE TABLE `sc` (
+                      `sid` INT NOT NULL,                    -- 学生ID
+                      `cno` INT NOT NULL,                    -- 开课编号
+                      `daily_grade` FLOAT DEFAULT NULL,      -- 平时成绩
+                      `term` VARCHAR(20),
+                      PRIMARY KEY (`sid`, `cno`),            -- 联合主键
+                      FOREIGN KEY (`sid`) REFERENCES `s`(`sid`),
+                      FOREIGN KEY (`cno`) REFERENCES `ct`(`cno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 插入前先建触发器
-DROP TRIGGER IF EXISTS `after_sct_insert`;
+-- 创建触发器，在插入选课记录时自动更新课程的已选人数
+DROP TRIGGER IF EXISTS `after_sc_insert`;
 DELIMITER //
-CREATE TRIGGER `after_sct_insert`
-    AFTER INSERT ON `sct`
+CREATE TRIGGER `after_sc_insert`
+    AFTER INSERT ON `sc`
     FOR EACH ROW
 BEGIN
-    UPDATE `c` SET `selected` = `selected` + 1 WHERE `cid` = NEW.`cid`;
+    UPDATE `c` SET `selected` = `selected` + 1
+    WHERE `cid` = (SELECT `cid` FROM `ct` WHERE `cno` = NEW.`cno`);
 END;
 //
 DELIMITER ;
 
--- 插入数据（插入后会自动更新课程的 selected 字段）
-INSERT INTO `sct` VALUES
-                      (10, 2, 8, 4, 2, '25-春季学期'),
-                      (11, 2, 10, 13, NULL, '25-春季学期'),
-                      (12, 2, 7, 4, 5, '25-春季学期'),
-                      (13, 4, 8, 4, 10, '25-春季学期'),
-                      (14, 4, 7, 4, NULL, '25-春季学期'),
-                      (15, 4, 10, 13, NULL, '25-春季学期'),
-                      (16, 1, 8, 4, NULL, '25-春季学期'),
-                      (17, 1, 10, 13, NULL, '25-春季学期');
+-- 创建删除触发器，删除选课记录时自动减少课程的已选人数
+DROP TRIGGER IF EXISTS `after_sc_delete`;
+DELIMITER //
+CREATE TRIGGER `after_sc_delete`
+    AFTER DELETE ON `sc`
+    FOR EACH ROW
+BEGIN
+    UPDATE `c` SET `selected` = `selected` - 1
+    WHERE `cid` = (SELECT `cid` FROM `ct` WHERE `cno` = OLD.`cno`);
+END;
+//
+DELIMITER ;
 
--- 开启外键检查
+-- 插入数据到 sc 表
+INSERT INTO `sc` (`sid`, `cno`, `daily_grade`,`term`) VALUES
+                                                                  (2, 2001, NULL,'25-春季学期'),       -- 姜雨彤选择数据库系统(陈旭东-25春季)，期末成绩2
+                                                                  (2, 2003, NULL,'25-春季学期'),    -- 姜雨彤选择计算机组成原理(刘铎-25春季)，暂无成绩
+                                                                  (2, 2002, NULL,'25-春季学期'),       -- 姜雨彤选择数据结构(陈旭东-25春季)，期末成绩5
+                                                                  (4, 2001, NULL,'25-春季学期'),      -- 黄爱雷选择数据库系统(陈旭东-25春季)，期末成绩10
+                                                                  (4, 2002, NULL,'25-春季学期'),    -- 黄爱雷选择数据结构(陈旭东-25春季)，暂无成绩
+                                                                  (4, 2003, NULL,'25-春季学期'),    -- 黄爱雷选择计算机组成原理(刘铎-25春季)，暂无成绩
+                                                                  (1, 2001, NULL,'25-春季学期'),    -- 周学超选择数据库系统(陈旭东-25春季)，暂无成绩
+                                                                  (1, 2003, NULL,'25-春季学期');    -- 周学超选择计算机组成原理(刘铎-25春季)，暂无成绩
+
+-- 删除并重建 Exam 表，主键为 cno，参照 ct 表
+DROP TABLE IF EXISTS `Exam`;
+CREATE TABLE `Exam` (
+                        `cno` INT NOT NULL,                    -- 开课编号，作为主键
+                        `day`  DATE,                             -- 考试日期
+                        `period` INT,                          -- 考试时段
+                        `durationMin` INT,                     -- 考试时长（分钟）
+                        `grade` FLOAT,                           -- 考试总分
+                        `location` VARCHAR(50),                -- 考试地点
+                        `Req` VARCHAR(255),                    -- 考试要求
+                        PRIMARY KEY (`cno`),
+                        FOREIGN KEY (`cno`) REFERENCES `ct`(`cno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Exam` (`cno`, `day`, `period`, `durationMin`, `grade`, `location`, `Req`) VALUES
+                                                                                           (2001, '2025-06-15', 4, 120, 100, 'YF409', '遵守考场纪律，保持安静'),                    -- 数据库系统考试
+                                                                                           (2002, '2025-06-15', 1, 120, 100, 'YF505', '携带学生证和文具，禁止作弊'),                -- 数据结构考试
+                                                                                           (2003, '2025-06-15', 6, 120, 100, 'YF404', '独立完成考试，不得交头接耳'),                -- 计算机组成原理考试
+                                                                                           (2004, '2025-06-15', 5, 120, 100, 'YF312', '提前 15 分钟入场，关闭手机'),               -- 计算机网络考试
+                                                                                           (2005, '2025-06-15', 7, 120, 100, NULL, '认真审题，规范答题'),                          -- 软件工程导论考试
+                                                                                           (2006, '2025-12-15', 5, 120, 100, 'YF312', '提前 15 分钟入场，关闭手机');               -- 计算机网络考试(秋季)                                                                                          (2006, 3, 5, 120, 100, 'YF312', '提前 15 分钟入场，关闭手机');               -- 计算机网络考试(秋季)                                                                                      (2006, 3, 5, 120, 100, 'YF312', '提前 15 分钟入场，关闭手机');               -- 计算机网络考试(秋季)
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -10,7 +10,7 @@ import org.apache.ibatis.type.Alias;
 @AllArgsConstructor
 @Alias("CourseTeacher")
 public class CourseTeacher {
-    private Integer ctid;
+    private Integer cno;
     private Integer cid;
     private Integer tid;
     private String term;

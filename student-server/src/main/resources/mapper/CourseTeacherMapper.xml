@@ -1,10 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.auggie.student_server.mapper.CourseTeacherMapper">
+
+    <!-- 插入开课记录（指定cno） -->
+    <insert id="insertCourseTeacher">
+        INSERT INTO studentms.ct (cno, cid, tid, term)
+        VALUES (#{cno}, #{cid}, #{tid}, #{term})
+    </insert>
+
+    <!-- 插入开课记录（自动生成cno） -->
+    <insert id="insertCourseTeacherAuto">
+        <selectKey keyProperty="cno" resultType="Integer" order="BEFORE">
+            SELECT IFNULL(MAX(cno), 2000) + 1 FROM studentms.ct
+        </selectKey>
+        INSERT INTO studentms.ct (cno, cid, tid, term)
+        VALUES (#{cno}, #{cid}, #{tid}, #{term})
+    </insert>
+
+    <!-- 根据开课编号查询开课记录 -->
+    <select id="findByCno" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct WHERE cno = #{cno}
+    </select>
+
+    <!-- 根据条件查询开课记录 -->
     <select id="findBySearch" resultType="CourseTeacher">
-        SELECT * FROM studentms.ct
+        SELECT cno, cid, tid, term FROM studentms.ct
         <where>
             <if test="cid != null">
                 cid = #{cid}
@@ -16,18 +37,30 @@
                 AND term = #{term}
             </if>
         </where>
+        ORDER BY cno
     </select>
 
+    <!-- 查询教师在指定学期的课程 -->
     <select id="findMyCourse" resultType="Course">
-        SELECT c.cid, c.cname, c.ccredit
-        FROM studentms.c c INNER JOIN studentms.ct ct ON c.cid = ct.cid
+        SELECT c.cid, c.cname, c.ccredit, c.day, c.period, c.capacity, c.selected, c.location
+        FROM studentms.c c
+                 INNER JOIN studentms.ct ct ON c.cid = ct.cid
         WHERE ct.tid = #{tid} AND ct.term = #{term}
     </select>
 
+    <!-- 查询教师的开课记录（包含cno信息） -->
+    <select id="findMyCourseTeacher" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct
+        WHERE tid = #{tid} AND term = #{term}
+        ORDER BY cno
+    </select>
+
+    <!-- 查询开课信息详情 -->
     <select id="findCourseTeacherInfo" resultType="CourseTeacherInfo">
-        SELECT c.cid, c.cname, t.tid, t.tname, c.ccredit
-        FROM studentms.c c INNER JOIN studentms.ct ct ON c.cid = ct.cid
-                INNER JOIN studentms.t ON ct.tid = t.tid
+        SELECT ct.cno, c.cname, t.tid, t.tname, c.ccredit, ct.term
+        FROM studentms.c c
+        INNER JOIN studentms.ct ct ON c.cid = ct.cid
+        INNER JOIN studentms.t t ON ct.tid = t.tid
         <where>
             <if test="tid != null">
                 t.tid = #{tid}
@@ -52,5 +85,99 @@
                 </if>
             </if>
         </where>
+        ORDER BY ct.cno
     </select>
+
+    <!-- 根据开课编号删除开课记录 -->
+    <delete id="deleteByCno">
+        DELETE FROM studentms.ct WHERE cno = #{cno}
+    </delete>
+
+    <!-- 根据CourseTeacher对象删除开课记录 -->
+    <delete id="deleteById">
+        DELETE FROM studentms.ct
+        <where>
+            <if test="cno != null">
+                cno = #{cno}
+            </if>
+            <if test="cno == null">
+                <if test="cid != null">
+                    cid = #{cid}
+                </if>
+                <if test="tid != null">
+                    AND tid = #{tid}
+                </if>
+                <if test="term != null">
+                    AND term = #{term}
+                </if>
+            </if>
+        </where>
+    </delete>
+
+    <!-- 更新开课记录（通过cno参数） -->
+    <update id="updateCourseTeacherByCno">
+        UPDATE studentms.ct
+        SET cid = #{cid}, tid = #{tid}, term = #{term}
+        WHERE cno = #{cno}
+    </update>
+
+    <!-- 更新开课记录（通过对象） -->
+    <update id="updateCourseTeacher">
+        UPDATE studentms.ct
+        <set>
+            <if test="cid != null">
+                cid = #{cid},
+            </if>
+            <if test="tid != null">
+                tid = #{tid},
+            </if>
+            <if test="term != null">
+                term = #{term}
+            </if>
+        </set>
+        WHERE cno = #{cno}
+    </update>
+
+    <!-- 查询所有开课记录 -->
+    <select id="findAll" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct ORDER BY cno
+    </select>
+
+    <!-- 根据学期查询开课记录 -->
+    <select id="findByTerm" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct
+        WHERE term = #{term}
+        ORDER BY cno
+    </select>
+
+    <!-- 获取最大的开课编号 -->
+    <select id="getMaxCno" resultType="java.lang.Integer">
+        SELECT MAX(cno) FROM studentms.ct
+    </select>
+
+    <!-- 检查开课编号是否存在 -->
+    <select id="checkCnoExists" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM studentms.ct WHERE cno = #{cno}
+    </select>
+
+    <!-- 根据课程ID查询开课记录 -->
+    <select id="findByCourseId" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct WHERE cid = #{cid} ORDER BY cno
+    </select>
+
+    <!-- 根据教师ID查询开课记录 -->
+    <select id="findByTeacherId" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct WHERE tid = #{tid} ORDER BY cno
+    </select>
+
+    <!-- 统计开课记录总数 -->
+    <select id="countAll" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM studentms.ct
+    </select>
+
+    <!-- 统计指定学期的开课记录数 -->
+    <select id="countByTerm" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM studentms.ct WHERE term = #{term}
+    </select>
+
 </mapper>

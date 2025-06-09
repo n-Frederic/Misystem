@@ -12,10 +12,11 @@
             c.location,
             c.day,
             c.period
-        FROM sct
-                 JOIN c ON sct.cid = c.cid
-                 JOIN t ON sct.tid = t.tid
-        WHERE sct.sid = #{sid} AND sct.term = #{term}
+        FROM studentms.sc sc
+                 INNER JOIN studentms.ct ct ON sc.cno = ct.cno
+                 INNER JOIN studentms.c c ON ct.cid = c.cid
+                 INNER JOIN studentms.t t ON ct.tid = t.tid
+        WHERE sc.sid = #{sid} AND sc.term = #{term}
     </select>
 
 </mapper>
