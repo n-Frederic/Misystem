@@ -1,6 +1,9 @@
 <template>
   <div>
     <el-form style="width: 60%" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+      <el-form-item label="学号" prop="sid">
+        <el-input v-model.number="ruleForm.sid" placeholder="请输入学号"></el-input>
+      </el-form-item>
       <el-form-item label="学生姓名" prop="sname">
         <el-input v-model="ruleForm.sname"></el-input>
       </el-form-item>
@@ -20,10 +23,15 @@ export default {
   data() {
     return {
       ruleForm: {
+        sid:'',
         sname: '',
         password: ''
       },
       rules: {
+        sid: [
+          { required: true, message: '请输入学号', trigger: 'blur' },
+          { type: 'number', message: '学号必须是数字', trigger: 'blur' }
+        ],
         sname: [
           { required: true, message: '请输入名称', trigger: 'blur' },
           { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }

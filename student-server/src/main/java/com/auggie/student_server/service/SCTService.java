@@ -26,7 +26,7 @@ public class SCTService {
     }
 
     public boolean isSCTExist(StudentCourseTeacher studentCourseTeacher) {
-        return studentCourseTeacherMapper.findBySCT(studentCourseTeacher).size() != 0;
+        return !studentCourseTeacherMapper.findBySCT(studentCourseTeacher).isEmpty();
     }
 
     public boolean save(StudentCourseTeacher studentCourseTeacher) {
