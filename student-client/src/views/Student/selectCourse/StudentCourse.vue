@@ -89,7 +89,7 @@ export default {
       const that = this;
       this.scheduleData = {}; // 清空已有课表数据
 
-      axios.post('http://localhost:10086/Schedule/getStudentSchedule', {
+      axios.post('http://localhost:10086/SCT/findBySid', {
         sid: this.sid,
         term: this.selectedTerm
       }).then(function (resp) {

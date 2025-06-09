@@ -28,6 +28,16 @@
           width="150">
       </el-table-column>
       <el-table-column
+          prop="day"
+          label="星期"
+          width="150">
+      </el-table-column>
+      <el-table-column
+          prop="period"
+          label="节"
+          width="150">
+      </el-table-column>
+      <el-table-column
           label="操作"
           width="100">
 
