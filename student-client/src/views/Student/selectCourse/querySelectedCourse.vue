@@ -7,7 +7,7 @@
           style="width: 100%">
         <el-table-column
             fixed
-            prop="cno"
+            prop="cid"
             label="课程号"
             width="150">
         </el-table-column>
@@ -57,32 +57,6 @@
       >
       </el-pagination>
     </el-card>
-<!--    &lt;!&ndash; 新增时间表 &ndash;&gt;-->
-<!--    <el-card class="timetable-card" shadow="hover" style="margin-top: 20px;">-->
-<!--      <div slot="header" class="clearfix">-->
-<!--        <span>课程时间表</span>-->
-<!--      </div>-->
-<!--      <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; text-align: center; border-collapse: collapse;">-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--          <th>节次/星期</th>-->
-<!--          <th v-for="dayName in dayNames" :key="dayName">{{ dayName }}</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-<!--        <tr v-for="period in periods" :key="period">-->
-<!--          <td>{{ period }}节</td>-->
-<!--          <td v-for="day in days" :key="day">-->
-<!--            <div v-if="getCourse(day, period)">-->
-<!--              <strong>{{ getCourse(day, period).cname }}</strong><br>-->
-<!--              {{ getCourse(day, period).location }}-->
-<!--            </div>-->
-<!--            <div v-else> </div>-->
-<!--          </td>-->
-<!--        </tr>-->
-<!--        </tbody>-->
-<!--      </table>-->
-<!--    </el-card>-->
   </div>
 </template>
 
@@ -105,11 +79,11 @@ export default {
   },
   methods: {
     deleteSCT(row) {
-      const cno = row.cno
+      const cid = row.cid
       const tid = row.tid
       const sid = sessionStorage.getItem('sid')
       const term = sessionStorage.getItem('currentTerm')
-      const sct = { cno, tid, sid, term }
+      const sct = { cid, tid, sid, term }
 
       const that = this
       axios.post('http://localhost:10086/SCT/deleteBySCT', sct).then(function (resp) {

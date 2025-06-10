@@ -10,8 +10,13 @@
             </div>
 
             <div class="search-panel">
-                <el-select v-model="searchForm.yearSemester" placeholder="请选择学期">
-                    <el-option label="2024-2025-2" value="2024-2025-2"></el-option>
+                <el-select v-model="searchForm.yearSemester" placeholder="请选择学期" @change="handleSearch">
+                    <el-option
+                        v-for="semester in semesterOptions"
+                        :key="semester"
+                        :label="semester"
+                        :value="semester">
+                    </el-option>
                 </el-select>
                 <el-input v-model="searchForm.examName" placeholder="考试名称" clearable></el-input>
                 <el-input v-model="searchForm.courseName" placeholder="考试课程" clearable></el-input>
@@ -37,85 +42,110 @@
 </template>
 
 <script>
+import axios from 'axios'; // 导入 axios
+
 export default {
     name: 'ExamSchedule',
     data() {
         return {
             searchForm: {
-                yearSemester: '2024-2025-2', // 默认选中
+                yearSemester: '', // 初始为空，将由后端数据填充或设置为默认值
                 examName: '',
                 courseName: '',
             },
-            allExams: [
-                // 这些数据通常会来自API调用
-                {
-                    examNumber: 1,
-                    examName: '[2024-2025-2] 2025 春季学期期末考试',
-                    course: '算法设计与分析 [03]',
-                    venue: '2025/07/03 09:00-11:00 源西楼 SX106',
-                    examMethod: '闭卷',
-                    remarks: '可以带计算器',
-                    registrationInfo: '不需报名',
-                    examStatus: '正在进行',
-                },
-                {
-                    examNumber: 2,
-                    examName: '[2024-2025-2] 2025 春季学期期末考试',
-                    course: '软件系统分析与设计 [01]',
-                    venue: '2025/06/30 14:30-16:30 源西楼 SX302',
-                    examMethod: '闭卷',
-                    remarks: '-',
-                    registrationInfo: '不需报名',
-                    examStatus: '正在进行',
-                },
-                {
-                    examNumber: 3,
-                    examName: '[2024-2025-2] 2025 春季学期期末考试',
-                    course: '习近平新时代中国特色社会主义思想概论 [09]',
-                    venue: '2025/06/26 09:00-11:00 未教学楼 YF310',
-                    examMethod: '闭卷',
-                    remarks: '-',
-                    registrationInfo: '不需报名',
-                    examStatus: '正在进行',
-                },
-                {
-                    examNumber: 4,
-                    examName: '[2024-2025-2] 2025 春季学期期末考试',
-                    course: '大数据概论 [03]',
-                    venue: '2025/06/25 14:30-16:30 源西楼 SX203',
-                    examMethod: '开卷',
-                    remarks: '可以带计算器',
-                    registrationInfo: '不需报名',
-                    examStatus: '正在进行',
-                },
-                // ... 更多考试数据
-            ],
+            allExams: [], // 考试数据将从后端获取
             filteredExams: [],
+            semesterOptions: [], // 用于存储所有学期选项
         };
     },
     created() {
-        // 在实际应用中，你会在这里获取数据
-        this.fetchExamData();
+        this.fetchSemesters(); // 组件创建时首先获取学期信息
+        // 考试数据会在 `searchForm.yearSemester` 发生变化时通过 `watch` 触发 `fetchExamData`
+    },
+    watch: {
+        // 监听 searchForm.yearSemester 的变化，一旦有了值就立即获取考试数据
+        'searchForm.yearSemester': {
+            handler(newVal) {
+                if (newVal) { // 只有当学期有值时才去获取考试数据
+                    this.fetchExamData();
+                }
+            },
+            immediate: true // 立即执行一次 handler，以便组件初次加载时根据默认学期获取数据
+        }
     },
     methods: {
-        fetchExamData() {
-            // 模拟API调用
-            // 在真实场景中，使用 axios 或 fetch:
-            // axios.get('/api/exams').then(response => {
-            //   this.allExams = response.data;
-            //   this.applyFilters();
-            // });
-            this.applyFilters(); // 应用初始过滤器以显示所有数据
+        /**
+         * 获取所有学期信息
+         */
+        async fetchSemesters() {
+            try {
+                // 假设后端获取学期列表的接口是 /semesters
+                const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
+                this.semesterOptions = response.data; // 假设返回的是一个字符串数组，例如 ["2024-2025-2", "2023-2024-1"]
+
+                // 如果当前没有选择学期，则默认选中第一个学期
+                if (!this.searchForm.yearSemester && this.semesterOptions.length > 0) {
+                    this.searchForm.yearSemester = this.semesterOptions[0];
+                }
+            } catch (error) {
+                console.error('获取学期信息失败:', error);
+                this.$message.error('获取学期信息失败，请检查网络或后端服务');
+                // 如果API调用失败，可以提供一个硬编码的默认学期作为回退
+                this.semesterOptions = ['2024-2025-2'];
+                if (!this.searchForm.yearSemester) {
+                    this.searchForm.yearSemester = '2024-2025-2';
+                }
+            }
         },
+
+        /**
+         * 根据查询条件获取考试安排信息
+         */
+        async fetchExamData() {
+            if (!this.searchForm.yearSemester) {
+                // 如果没有选择学期，则不清空数据也不发送请求
+                this.allExams = [];
+                this.filteredExams = [];
+                return;
+            }
+            try {
+                const response = await axios.get('http://localhost:10086/exams', {
+                    params: {
+                        yearSemester: this.searchForm.yearSemester,
+                        examName: this.searchForm.examName,
+                        courseName: this.searchForm.courseName,
+                    },
+                });
+                this.allExams = response.data; // 假设后端返回的是已过滤的考试列表
+                this.applyFilters(); // 即使后端已过滤，这里也调用一次，以防万一或用于进一步客户端过滤
+            } catch (error) {
+                console.error('获取考试安排数据失败:', error);
+                this.$message.error('获取考试安排信息失败，请检查网络或后端服务');
+                this.allExams = []; // 清空数据
+                this.applyFilters();
+            }
+        },
+
+        /**
+         * 处理查询按钮点击事件
+         */
         handleSearch() {
-            this.applyFilters();
+            // 当点击查询按钮或学期选择框变化时，重新从后端获取数据
+            this.fetchExamData();
         },
+
+        /**
+         * 应用客户端过滤器（如果后端未完全过滤）
+         */
         applyFilters() {
+            // 注意：如果后端已经根据 examName 和 courseName 进行了精确过滤，
+            // 这里的客户端过滤可能就不再需要。
+            // 但为了兼容性，保留此方法作为最终的客户端筛选。
             this.filteredExams = this.allExams.filter(exam => {
-                const matchesYearSemester = this.searchForm.yearSemester ? exam.examName.includes(this.searchForm.yearSemester) : true;
                 const matchesExamName = this.searchForm.examName ? exam.examName.includes(this.searchForm.examName) : true;
                 const matchesCourseName = this.searchForm.courseName ? exam.course.includes(this.searchForm.courseName) : true;
-                return matchesYearSemester && matchesExamName && matchesCourseName;
+                // 注意：yearSemester 的过滤已经在 fetchExamData 中由后端完成，所以这里不再重复过滤
+                return matchesExamName && matchesCourseName;
             });
         },
         // handleOperation(row) {

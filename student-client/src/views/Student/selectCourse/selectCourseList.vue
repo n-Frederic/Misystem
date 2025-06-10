@@ -28,6 +28,16 @@
           width="150">
       </el-table-column>
       <el-table-column
+          prop="tTime"
+          label="星期"
+          width="150">
+      </el-table-column>
+      <el-table-column
+          prop="period"
+          label="节"
+          width="150">
+      </el-table-column>
+      <el-table-column
           label="操作"
           width="100">
 
@@ -157,6 +167,8 @@ export default {
                       cname: item.cname,
                       tid: item.tid,
                       tname: item.tname,
+                      tTime: item.tTime,
+                      period: item.period,
                       ccredit: item.ccredit,
                       term: item.term,
                       完整对象: item
