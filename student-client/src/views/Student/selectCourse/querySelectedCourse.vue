@@ -27,6 +27,16 @@
             width="150">
         </el-table-column>
         <el-table-column
+            prop="tTime"
+            label="时间"
+            width="150">
+        </el-table-column>
+        <el-table-column
+            prop="period"
+            label="节"
+            width="150">
+        </el-table-column>
+        <el-table-column
             prop="ccredit"
             label="学分"
             width="150">
