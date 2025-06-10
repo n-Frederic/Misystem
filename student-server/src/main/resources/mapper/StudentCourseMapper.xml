@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auggie.student_server.mapper.StudentCourseMapper">
     <select id="findByStudentId" resultType="CourseTeacherInfo">
-        SELECT c.cid, c.cname, t.tid, t.tname, sc.daily_grade, c.ccredit
+        SELECT ct.cno,c.cid, c.cname, t.tid, t.tname, sc.daily_grade, c.ccredit
         FROM studentms.sc sc
                  INNER JOIN studentms.s s ON sc.sid = s.sid
                  INNER JOIN studentms.ct ct ON sc.cno = ct.cno
@@ -14,7 +14,7 @@
     </select>
 
     <select id="findBySearch" resultType="scInfo">
-        SELECT c.cid, c.cname, t.tid, t.tname, s.sid, s.sname, sc., sc.term
+        SELECT ct.cno,c.cid, c.cname, t.tid, t.tname, s.sid, s.sname, sc., sc.term
         FROM studentms.sc sc
                 INNER JOIN studentms.s s ON sc.sid = s.sid
                 INNER JOIN studentms.ct ct ON sc.cno = ct.cno

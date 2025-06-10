@@ -11,7 +11,7 @@
               style="width: 100%">
             <el-table-column
                 fixed
-                prop="cid"
+                prop="cno"
                 label="课程号"
                 width="150">
             </el-table-column>
@@ -72,6 +72,9 @@ export default {
     const that = this
     axios.get('http://localhost:10086/courseTeacher/findMyCourse/' + this.tid + '/' + this.term).then(function (resp) {
 
+        console.log('后端返回的原始数据:', resp.data)
+        console.log('第一条数据的结构:', resp.data[0])
+        console.log('数据的所有字段:', Object.keys(resp.data[0] || {}))
       that.tmpList = resp.data
       that.total = resp.data.length
       let start = 0, end = that.pageSize

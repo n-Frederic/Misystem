@@ -41,10 +41,10 @@
     </select>
 
     <!-- 查询教师在指定学期的课程 -->
-    <select id="findMyCourse" resultType="Course">
-        SELECT c.cid, c.cname, c.ccredit, c.day, c.period, c.capacity, c.selected, c.location
-        FROM studentms.c c
-                 INNER JOIN studentms.ct ct ON c.cid = ct.cid
+    <select id="findMyCourse" resultType="CourseTeacherInfo">
+        SELECT ct.cno, c.cname, c.ccredit
+        FROM studentms.ct ct
+                 INNER JOIN studentms.c c ON c.cid = ct.cid
         WHERE ct.tid = #{tid} AND ct.term = #{term}
     </select>
 

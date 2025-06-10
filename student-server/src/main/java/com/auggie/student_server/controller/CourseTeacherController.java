@@ -81,7 +81,7 @@ public class CourseTeacherController {
      * @return 课程列表
      */
     @GetMapping("/findMyCourse/{tid}/{term}")
-    public List<Course> findMyCourse(@PathVariable Integer tid, @PathVariable String term) {
+    public List<CourseTeacherInfo> findMyCourse(@PathVariable Integer tid, @PathVariable String term) {
         System.out.println("查询教师课程：" + tid + " " + term);
         return courseTeacherService.findMyCourse(tid, term);
     }

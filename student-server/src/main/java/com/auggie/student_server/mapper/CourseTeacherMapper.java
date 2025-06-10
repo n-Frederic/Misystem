@@ -40,14 +40,14 @@ public interface CourseTeacherMapper {
     /**
      * 根据条件查询开课记录
      */
-    List<CourseTeacher> findBySearch(@Param("cid") Integer cid,
+    List<CourseTeacher> findBySearch(@Param("cno") Integer cno,
                                      @Param("tid") Integer tid,
                                      @Param("term") String term);
 
     /**
      * 查询教师在指定学期的课程
      */
-    List<Course> findMyCourse(@Param("tid") Integer tid, @Param("term") String term);
+    List<CourseTeacherInfo> findMyCourse(@Param("tid") Integer tid, @Param("term") String term);
 
     /**
      * 查询教师的开课记录（包含cno信息）

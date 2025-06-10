@@ -20,7 +20,7 @@ export default {
   data() {
     return {
       ruleForm: {
-        cid: null,
+        cno: null,
         cname: null,
         ccredit: null
       },
@@ -37,13 +37,13 @@ export default {
   },
   created() {
     const that = this
-    if (this.$route.query.cid === undefined) {
-      this.ruleForm.cid = 1
+    if (this.$route.query.cno === undefined) {
+      this.ruleForm.cno = 1
     }
     else {
-      this.ruleForm.cid = this.$route.query.cid
+      this.ruleForm.cno = this.$route.query.cno
     }
-    axios.get('http://localhost:10086/course/findById/' + this.ruleForm.cid).then(function (resp) {
+    axios.get('http://localhost:10086/course/findById/' + this.ruleForm.cno).then(function (resp) {
       that.ruleForm = resp.data[0]
       console.log(that.ruleForm)
     })

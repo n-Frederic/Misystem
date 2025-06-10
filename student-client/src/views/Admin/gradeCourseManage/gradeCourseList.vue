@@ -7,7 +7,7 @@
         style="width: 100%">
       <el-table-column
           fixed
-          prop="cid"
+          prop="cno"
           label="课程号"
           width="150">
       </el-table-column>
@@ -87,10 +87,10 @@ export default {
       const that = this
       console.log(row)
       const sid = row.sid
-      const cid = row.cid
+      const cno = row.cno
       const tid = row.tid
       const term = row.term
-      axios.get("http://localhost:10086/SCT/deleteById/" + sid + '/' + cid + '/' + tid + '/' + term).then(function (resp) {
+      axios.get("http://localhost:10086/SCT/deleteById/" + sid + '/' + cno + '/' + tid + '/' + term).then(function (resp) {
         console.log(resp)
         if (resp.data === true) {
           that.$message({

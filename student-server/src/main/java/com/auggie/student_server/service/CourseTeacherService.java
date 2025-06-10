@@ -67,7 +67,7 @@ public class CourseTeacherService {
      * @param term 学期
      * @return 课程列表
      */
-    public List<Course> findMyCourse(Integer tid, String term) {
+    public List<CourseTeacherInfo> findMyCourse(Integer tid, String term) {
         return courseTeacherMapper.findMyCourse(tid, term);
     }
 

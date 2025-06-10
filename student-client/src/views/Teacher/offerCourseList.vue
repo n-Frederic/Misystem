@@ -57,7 +57,7 @@ export default {
     },
     deleteTeacher(row) {
       const that = this
-      axios.get('http://localhost:10086/course/deleteById/' + row.cid).then(function (resp) {
+      axios.get('http://localhost:10086/course/deleteById/' + row.cno).then(function (resp) {
         if (resp.data === true) {
           that.$message({
             showClose: true,
@@ -77,11 +77,11 @@ export default {
     },
     offer(row) {
       const tid = sessionStorage.getItem("tid")
-      const cid = row.cid
+      const cno = row.cno
       const term = sessionStorage.getItem("currentTerm")
 
       const that = this
-      axios.get('http://localhost:10086/courseTeacher/insert/' + cid + '/' + tid + '/' + term).then(function (resp) {
+      axios.get('http://localhost:10086/courseTeacher/insert/' + cno + '/' + tid + '/' + term).then(function (resp) {
         if (resp.data === true) {
           that.$message({
             showClose: true,
@@ -113,7 +113,7 @@ export default {
       this.$router.push({
         path: '/editorCourse',
         query: {
-          cid: row.cid
+          cno: row.cno
         }
       })
     }

@@ -13,8 +13,8 @@
             <el-form-item label="模糊查询" prop="sFuzzy">
               <el-switch v-model="ruleForm.sFuzzy"></el-switch>
             </el-form-item>
-            <el-form-item label="课程号" prop="cid">
-              <el-input v-model.number="ruleForm.cid"></el-input>
+            <el-form-item label="课程号" prop="cno">
+              <el-input v-model.number="ruleForm.cno"></el-input>
             </el-form-item>
             <el-form-item label="课程名" prop="cname">
               <el-input v-model="ruleForm.cname"></el-input>
@@ -60,7 +60,7 @@ export default {
         tid: sessionStorage.getItem('tid'),
         tname: null,
         tFuzzy: true,
-        cid: null,
+        cno: null,
         cname: null,
         cFuzzy: true,
         lowBound: null,
@@ -68,7 +68,7 @@ export default {
         term: sessionStorage.getItem('currentTerm')
       },
       rules: {
-        cid: [
+        cno: [
           { type: 'number', message: '必须是数字类型' }
         ],
         tid: [

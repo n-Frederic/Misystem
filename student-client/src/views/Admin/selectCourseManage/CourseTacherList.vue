@@ -8,7 +8,7 @@
         style="width: 100%">
       <el-table-column
           fixed
-          prop="cid"
+          prop="cno"
           label="课号"
           width="150">
       </el-table-column>
@@ -60,12 +60,12 @@ export default {
   methods: {
     select(row) {
       console.log(row)
-      const cid = row.cid
+      const cno = row.cno
       const tid = row.tid
       const sid = sessionStorage.getItem('sid')
       const term = sessionStorage.getItem('currentTerm')
       const sct = {
-        cid: cid,
+        cno: cno,
         tid: tid,
         sid: sid,
         term: term
