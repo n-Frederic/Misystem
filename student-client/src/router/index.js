@@ -32,7 +32,6 @@ import querySelectedCourse from "@/views/Student/selectCourse/querySelectedCours
 import StudentCourse from "@/views/Student/selectCourse/StudentCourse";
 import studentCourseGrade from "@/views/Student/courseGrade/index";
 import MyExam from "@/views/Student/My-Exam/index";
-import queryExam from "@/views/Student/My-Exam/queryExam.vue";
 import queryCourseGrade from "@/views/Student/courseGrade/queryCourseGrade";
 import queryGradeCourse from "@/views/Admin/gradeCourseManage/queryGradeCourse";
 import editorGradeCourse from "@/views/Admin/gradeCourseManage/editorGradeCourse";
@@ -41,6 +40,9 @@ import teacherQueryGradeCourse from "@/views/Teacher/teacherGradeCourseManage/te
 import teacherGradeCourseList from "@/views/Teacher/teacherGradeCourseManage/teacherGradeCourseList";
 import teacherEditorGradeCourse from "@/views/Teacher/teacherGradeCourseManage/teacherEditorGradeCourse";
 import updateInfo from "@/components/updateInfo";
+import examManage from "@/views/Admin/examManage/index";
+import queryExam from "@/views/Admin/examManage/queryExam";
+import editorExam from "@/views/Admin/examManage/editorExam";
 
 Vue.use(VueRouter)
 
@@ -212,6 +214,26 @@ const routes = [
             name: '编辑',
             component: editorGradeCourse,
             meta: {requireAuth: true}
+          }
+        ]
+      },
+      {
+        path: '/examManage',
+        name: '考试管理',
+        component: examManage,
+        meta: { requireAuth: true },
+        children: [
+          {
+            path: '/queryExam',
+            name: '考试查询',
+            component: queryExam,
+            meta: { requireAuth: true },
+          },
+          {
+            path: '/editorExam',
+            name: '编辑考试',
+            component: editorExam,
+            meta: { requireAuth: true }
           }
         ]
       }
