@@ -1,15 +1,15 @@
 package com.auggie.student_server.entity;
 
 public class CourseDTO {
-    private String cid;
+    private Integer cno;
     private String cname;
     private String tname;
     private String location;
     private int day;
     private int period;
 
-    public CourseDTO(String cid, String cname, String tname, String location, int day, int period) {
-        this.cid = cid;
+    public CourseDTO(Integer cno, String cname, String tname, String location, int day, int period) {
+        this.cno = cno;
         this.cname = cname;
         this.tname = tname;
         this.location = location;
@@ -17,12 +17,12 @@ public class CourseDTO {
         this.period = period;
     }
 
-    public String getCid() {
-        return cid;
+    public Integer getcno() {
+        return cno;
     }
 
-    public void setCid(String cid) {
-        this.cid = cid;
+    public void setcno(Integer cno) {
+        this.cno = cno;
     }
 
     public String getCname() {

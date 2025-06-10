@@ -7,7 +7,6 @@
     <select id="getStudentSchedule" resultType="com.auggie.student_server.entity.CourseDTO">
         SELECT
             ct.cno,
-            c.cid,
             c.cname,
             t.tname,
             c.location,
