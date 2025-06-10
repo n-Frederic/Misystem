@@ -32,6 +32,8 @@ import querySelectedCourse from "@/views/Student/selectCourse/querySelectedCours
 import StudentCourse from "@/views/Student/selectCourse/StudentCourse";
 import studentCourseGrade from "@/views/Student/courseGrade/index";
 import MyExam from "@/views/Student/My-Exam/index";
+import Classroom from "@/views/Student/Classroom/index";
+import ClassroomResources from "@/views/Student/Classroom/ClassroomResources"
 import queryCourseGrade from "@/views/Student/courseGrade/queryCourseGrade";
 import queryGradeCourse from "@/views/Admin/gradeCourseManage/queryGradeCourse";
 import editorGradeCourse from "@/views/Admin/gradeCourseManage/editorGradeCourse";
@@ -404,7 +406,21 @@ const routes = [
             meta: {requireAuth: true}
           },
         ]
-      }
+      },
+      {
+        path: '/Classroom',
+        name: '教室',
+        component: Classroom,
+        meta: {requireAuth: true},
+        children: [
+          {
+            path: '/ClassroomResources',
+            name: '教室资源',
+            component: ClassroomResources,
+            meta: {requireAuth: true}
+          },
+        ]
+      },
     ]
   }
 ]
