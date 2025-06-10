@@ -31,9 +31,9 @@ import selectCourse from "@/views/Student/selectCourse/selectCourse";
 import querySelectedCourse from "@/views/Student/selectCourse/querySelectedCourse";
 import StudentCourse from "@/views/Student/selectCourse/StudentCourse";
 import studentCourseGrade from "@/views/Student/courseGrade/index";
+import MyExam from "@/views/Student/My-Exam/index";
 import Classroom from "@/views/Student/Classroom/index";
 import ClassroomResources from "@/views/Student/Classroom/ClassroomResources"
-import MyExam from "@/views/Student/My-Exam/index";
 import queryCourseGrade from "@/views/Student/courseGrade/queryCourseGrade";
 import queryGradeCourse from "@/views/Admin/gradeCourseManage/queryGradeCourse";
 import editorGradeCourse from "@/views/Admin/gradeCourseManage/editorGradeCourse";
@@ -420,7 +420,7 @@ const routes = [
             meta: {requireAuth: true}
           },
         ]
-      }
+      },
     ]
   }
 ]
