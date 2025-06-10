@@ -1,5 +1,8 @@
 <template>
   <div>
+    <el-button type="success" size="small" @click="exportToExcel" style="margin-bottom: 10px;">
+      导出学生信息到Excel
+    </el-button>
     <el-table
         :data="tableData"
         border
@@ -50,6 +53,8 @@
 </template>
 
 <script>
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 export default {
   methods: {
     deleteStudent(row) {
@@ -106,6 +111,42 @@ export default {
         query: {
           sid: row.sid
         }
+      })
+    },
+    exportToExcel() {
+      const that = this
+      axios.get('http://localhost:10086/student/getAllStudents').then(function (resp) {
+        const data = resp.data
+        // 转换为工作表
+        const worksheet = XLSX.utils.json_to_sheet(data, {
+          header: ['sid', 'sname', 'password'], 
+          skipHeader: false
+        })
+        worksheet['!cols'] = [
+          { wch: 15 },
+          { wch: 12 },
+          { wch: 12 }
+        ]
+        XLSX.utils.sheet_add_aoa(worksheet, [['学号', '姓名', '密码']], { origin: 'A1' })
+        // 创建工作簿
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, '学生数据')
+        // 生成 Excel 文件
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+        // 下载文件
+        saveAs(blob, '学生数据.xlsx')
+        that.$message({
+          showClose: true,
+          message: '导出Excel成功',
+          type: 'success'
+        })
+      }).catch(function (e) {
+        that.$message({
+          showClose: true,
+          message: '导出Excel失败，请检查网络或数据',
+          type: 'error'
+        })
       })
     }
   },
