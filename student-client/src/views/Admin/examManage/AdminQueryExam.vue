@@ -72,7 +72,7 @@ export default {
   },
   created() {
     const that = this;
-    axios.get('http://localhost:10086/exam/getAllExams').then(function (resp) {
+    axios.get('http://localhost:10086/exam/findAllExam').then(function (resp) {
       that.tableData = resp.data;
     }).catch(function (e) {
       that.$message({
