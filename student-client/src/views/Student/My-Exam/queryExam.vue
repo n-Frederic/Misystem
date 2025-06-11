@@ -109,7 +109,7 @@ export default {
                 return;
             }
             try {
-                const response = await axios.get('http://localhost:10086/exams', {
+                const response = await axios.get('http://localhost:10086/exams/findExam', {
                     params: {
                         yearSemester: this.searchForm.yearSemester,
                         examName: this.searchForm.examName,
