@@ -4,26 +4,31 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auggie.student_server.mapper.ExamMapper">
     <select id="findExam" resultType="Exam">
-        SELECT *
-        FROM studentms.exam
+        SELECT e.cno,c.cname,e.day,e.period,e.durationMin,e.grade,e.location,e.Req
+        FROM studentms.exam e
 
-            INNER JOIN studentms.sc sc ON exam.cno = sc.cno
+            INNER JOIN studentms.sc sc ON e.cno = sc.cno
+            INNER JOIN studentms.ct ct ON ct.cno = e.cno
+            INNER JOIN studentms.c c ON c.cid = ct.cid
 
         WHERE sc.sid = #{sid} AND sc.term = #{term}
     </select>
 
     <select id="findTeacherExam" resultType="Exam">
-        SELECT *
-        FROM studentms.exam
+        SELECT  e.cno,c.cname,e.day,e.period,e.durationMin,e.grade,e.location,e.Req
+        FROM studentms.exam e
 
-                 INNER JOIN studentms.ct ct ON exam.cno = ct.cno
+                 INNER JOIN studentms.ct ct ON e.cno = ct.cno
+                 INNER JOIN studentms.c c ON c.cid = ct.cid
 
         WHERE ct.tid = #{tid} AND ct.term = #{term}
     </select>
 
     <select id="findAllExam" resultType="Exam">
-        SELECT *
-        FROM studentms.exam
+        SELECT e.cno,c.cname,e.day,e.period,e.durationMin,e.grade,e.location,e.Req
+        FROM studentms.exam e
+                 INNER JOIN studentms.ct ct ON e.cno = ct.cno
+                 INNER JOIN studentms.c c ON c.cid = ct.cid
     </select>
 
 
