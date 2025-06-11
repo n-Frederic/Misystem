@@ -21,6 +21,9 @@
                         prop="day"
                         label="考试日期"
                         width="120">
+                        <template slot-scope="scope">
+                          {{ scope.row.day | dateFormat }}
+                        </template>
                 </el-table-column>
                 <el-table-column
                         prop="period"
