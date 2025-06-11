@@ -32,18 +32,14 @@
     <update id="updateById">
         UPDATE studentms.c
         SET cname = #{course.cname},
-            ccredit = #{course.ccredit},
-            day = #{course.day},
-            period = #{course.period},
-            capacity = #{course.capacity},
-            selected = #{course.selected},
-            location = #{course.location}
+            ccredit = #{course.ccredit}
+
         WHERE cid = #{course.cid}
     </update>
 
 
     <insert id="insertCourse">
-        INSERT INTO studentms.c (cname, ccredit, day, period, capacity, selected, location)
+        INSERT INTO studentms.c (cname, ccredit)
         VALUES (#{course.cname}, #{course.ccredit}, #{course.day}, #{course.period},
                 #{course.capacity}, #{course.selected}, #{course.location})
     </insert>
