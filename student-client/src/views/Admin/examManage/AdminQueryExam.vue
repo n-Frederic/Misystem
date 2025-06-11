@@ -12,6 +12,12 @@
             width="100">
         </el-table-column>
         <el-table-column
+            fixed
+            prop="cname"
+            label="课程名称"
+            width="100">
+        </el-table-column>
+        <el-table-column
             prop="day"
             label="考试日期"
             width="120">
@@ -63,6 +69,8 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
   name: 'AdminQueryExam',
   data() {
@@ -70,19 +78,30 @@ export default {
       tableData: []
     };
   },
+  filters: {
+    dateFormat(value) {
+      if (!value) return '';
+      return moment(value).format('YYYY-MM-DD'); // 格式化日期
+    }
+  },
   created() {
-    const that = this;
-    axios.get('http://localhost:10086/exams/findAllExam').then(function (resp) {
-      that.tableData = resp.data;
-    }).catch(function (e) {
-      that.$message({
-        showClose: true,
-        message: '获取考试数据失败',
-        type: 'error'
-      });
-    });
+    this.loadExams();
   },
   methods: {
+    loadExams() {
+      const that = this;
+      axios.get('http://localhost:10086/exams/findAllExam').then(function (resp) {
+        console.log('接口返回数据:', resp.data); // 调试用
+        that.tableData = resp.data;
+      }).catch(function (e) {
+        console.error('接口错误:', e); // 调试用
+        that.$message({
+          showClose: true,
+          message: '获取考试数据失败: ' + e.message,
+          type: 'error'
+        });
+      });
+    },
     deleteExam(row) {
       const that = this;
       axios.get('http://localhost:10086/exams/deleteById/' + row.cno).then(function (resp) {
@@ -92,7 +111,7 @@ export default {
             message: '删除成功',
             type: 'success'
           });
-          // 重新加载数据
+          that.loadExams(); // 重新加载数据
         } else {
           that.$message({
             showClose: true,
@@ -103,14 +122,9 @@ export default {
       }).catch(function (e) {
         that.$message({
           showClose: true,
-          message: '删除失败，存在外键依赖',
+          message: '删除失败，存在外键依赖或网络错误: ' + e.message,
           type: 'error'
         });
-      });
-      this.$message({
-        showClose: true,
-        message: '删除功能待实现',
-        type: 'warning'
       });
     },
     editExam(row) {
