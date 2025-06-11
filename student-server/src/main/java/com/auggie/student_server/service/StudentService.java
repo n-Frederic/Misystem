@@ -31,6 +31,9 @@ public class StudentService {
 
         return list;
     }
+    public List<Student> getAllStudents(){
+        return studentMapper.findAll();
+    }
 
     public List<Student> findBySearch(Integer sid, String sname, Integer fuzzy) {
         Student student = new Student();

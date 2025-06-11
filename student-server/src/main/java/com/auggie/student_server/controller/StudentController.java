@@ -57,6 +57,9 @@ public class StudentController {
         return studentService.getLength();
     }
 
+    @GetMapping("/getAllStudents")
+    public List<Student> getAllStudents(){ return studentService.getAllStudents();}
+
     @GetMapping("/deleteById/{sid}")
     public boolean deleteById(@PathVariable("sid") int sid) {
         System.out.println("正在删除学生 sid：" + sid);
