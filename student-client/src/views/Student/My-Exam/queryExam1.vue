@@ -12,60 +12,63 @@
             <div class="search-panel">
                 <el-select v-model="searchForm.yearSemester" placeholder="请选择学期" @change="handleSearch">
                     <el-option
-                            v-for="semester in semesterOptions"
-                            :key="semester"
-                            :label="semester"
-                            :value="semester">
-                    </el-option>
+                        v-for="semester in semesterOptions"
+                        :key="semester.value"     :label="semester.label"   :value="semester.value">  </el-option>
                 </el-select>
                 <el-input v-model="searchForm.examName" placeholder="考试名称" clearable></el-input>
                 <el-input v-model="searchForm.courseName" placeholder="考试课程" clearable></el-input>
                 <el-button type="primary" @click="handleSearch">查询</el-button>
             </div>
 
+            <div style="margin-bottom: 15px; padding: 10px; border: 1px dashed #ccc; background-color: #f9f9f9; font-size: 14px;">
+                <p>当前请求 SID: <span style="font-weight: bold; color: blue;">{{ debugSid || '未获取' }}</span></p>
+                <p>当前请求 Term: <span style="font-weight: bold; color: blue;">{{ debugTerm || '未获取' }}</span></p>
+                <p style="color: gray;">(这些值将在发送考试安排请求时使用)</p>
+            </div>
+
             <el-table :data="filteredExams" style="width: 100%" border>
                 <el-table-column
-                        prop="examNumber"
-                        label="序号"
-                        width="80">
+                    prop="examNumber"
+                    label="序号"
+                    width="80">
                 </el-table-column>
                 <el-table-column
-                        prop="examName"
-                        label="考试"
-                        width="250">
+                    prop="examName"
+                    label="考试"
+                    width="250">
                 </el-table-column>
                 <el-table-column
-                        prop="course"
-                        label="课程"
-                        width="200">
+                    prop="course"
+                    label="课程"
+                    width="200">
                 </el-table-column>
                 <el-table-column
-                        prop="Time"
-                        label="时间">
+                    prop="Time"
+                    label="时间">
                 </el-table-column>
                 <el-table-column
-                        prop="venue"
-                        label="地点">
+                    prop="venue"
+                    label="地点">
                 </el-table-column>
                 <el-table-column
-                        prop="examMethod"
-                        label="考试方式"
-                        width="100">
+                    prop="examMethod"
+                    label="考试方式"
+                    width="100">
                 </el-table-column>
                 <el-table-column
-                        prop="remarks"
-                        label="备注"
-                        width="150">
+                    prop="remarks"
+                    label="备注"
+                    width="150">
                 </el-table-column>
                 <el-table-column
-                        prop="registrationInfo"
-                        label="报名信息"
-                        width="100">
+                    prop="registrationInfo"
+                    label="报名信息"
+                    width="100">
                 </el-table-column>
                 <el-table-column
-                        prop="examStatus"
-                        label="考试状态"
-                        width="100">
+                    prop="examStatus"
+                    label="考试状态"
+                    width="100">
                 </el-table-column>
                 <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
@@ -91,6 +94,10 @@ export default {
             allExams: [], // 考试数据将从后端获取
             filteredExams: [],
             semesterOptions: [], // 用于存储所有学期选项
+
+            // 新增用于在页面上显示调试信息的属性
+            debugSid: '',
+            debugTerm: '',
         };
     },
     created() {
@@ -114,21 +121,57 @@ export default {
          */
         async fetchSemesters() {
             try {
-                // 假设后端获取学期列表的接口是 /semesters
+                // 假设后端获取学期列表的接口是 /SCT/findAllTerm
                 const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
-                this.semesterOptions = response.data; // 假设返回的是一个字符串数组，例如 ["2024-2025-2", "2023-2024-1"]
+                // **核心修改：将后端返回的字符串转换为 { label, value } 对象**
+                this.semesterOptions = response.data.map(termString => {
+                    const parts = termString.split('-'); // 例如 "25", "春季学期"
+                    const yearSuffix = parts[0]; // "25"
+                    const season = parts[1]; // "春季学期"
 
-                // 如果当前没有选择学期，则默认选中第一个学期
+                    // 推断完整年份，例如 25 转换为 2025
+                    // 这里假设都是当前世纪的年份，如果跨世纪需要更复杂的逻辑
+                    const currentYear = new Date().getFullYear(); // 2025
+                    const centuryPrefix = String(currentYear).substring(0, 2); // "20"
+                    const fullYear = parseInt(`${centuryPrefix}${yearSuffix}`);
+
+                    let semesterValue = '';
+                    if (season.includes('春季')) {
+                        semesterValue = '1';
+                    } else if (season.includes('秋季')) {
+                        semesterValue = '2';
+                    } else if (season.includes('夏季')) { // 如果有夏季学期
+                        semesterValue = '3';
+                    }
+                    // 注意：这里假设后端期望的格式是 "YYYY-S"
+                    return {
+                        label: termString,              // 例如 "25-春季学期"
+                        value: `${fullYear}-${semesterValue}` // 例如 "2025-1"
+                    };
+                }).sort((a, b) => { // 排序以确保学期顺序正确，例如最新学期在前
+                    const yearA = parseInt(a.value.split('-')[0]);
+                    const yearB = parseInt(b.value.split('-')[0]);
+                    const semA = parseInt(a.value.split('-')[1]);
+                    const semB = parseInt(b.value.split('-')[1]);
+                    if (yearA !== yearB) return yearB - yearA; // 年份降序
+                    return semB - semA; // 同一年份学期降序
+                });
+
+
+                // 如果当前没有选择学期，则默认选中第一个学期（转换后的 value）
                 if (!this.searchForm.yearSemester && this.semesterOptions.length > 0) {
-                    this.searchForm.yearSemester = this.semesterOptions[0];
+                    this.searchForm.yearSemester = this.semesterOptions[0].value;
+                    // **重要：首次加载时，也将正确的学期格式存入 sessionStorage**
+                    sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
                 }
             } catch (error) {
                 console.error('获取学期信息失败:', error);
                 this.$message.error('获取学期信息失败，请检查网络或后端服务');
-                // 如果API调用失败，可以提供一个硬编码的默认学期作为回退
-                this.semesterOptions = ['2024-2025-2'];
+                // 如果API调用失败，提供一个硬编码的默认学期作为回退，注意格式
+                this.semesterOptions = [{ label: '2024-2025学年第二学期', value: '2024-2025-2' }];
                 if (!this.searchForm.yearSemester) {
                     this.searchForm.yearSemester = '2024-2025-2';
+                    sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
                 }
             }
         },
@@ -144,15 +187,39 @@ export default {
                 return;
             }
             try {
-                const response = await axios.get('http://localhost:10086/exams/findExam', {
-                    params: {
-                        yearSemester: this.searchForm.yearSemester,
-                        examName: this.searchForm.examName,
-                        courseName: this.searchForm.courseName,
-                    },
-                });
+                const sid = sessionStorage.getItem('sid');
+                // **term 从 sessionStorage 获取，现在应该已经是 YYYY-S 格式了**
+                //const term = sessionStorage.getItem('currentTerm');
+                const term="25-春季学期";
+
+                // **显示在页面上的调试信息**
+                this.debugSid = sid;
+                this.debugTerm = term;
+
+                // 调试输出到控制台
+                console.log('DEBUG: 准备发送考试安排请求 - SID:', sid, 'Term:', term);
+
+                // **严格检查 sid 和 term 是否存在，避免拼接出 "null" 或 "undefined"**
+                if (!sid) {
+                    this.$message.error('学生ID缺失，请重新登录。');
+                    this.allExams = [];
+                    this.applyFilters();
+                    return; // 提前退出
+                }
+                if (!term) {
+                    this.$message.error('学期信息缺失，无法获取考试安排。');
+                    this.allExams = [];
+                    this.applyFilters();
+                    return; // 提前退出
+                }
+
+                // **确认已将 axios.post 改为 axios.get**
+                // 使用模板字符串拼接 URL 更清晰
+                const response = await axios.get(`http://localhost:10086/exams/findExam/${sid}/${"term"}`);
+
                 this.allExams = response.data; // 假设后端返回的是已过滤的考试列表
                 this.applyFilters(); // 即使后端已过滤，这里也调用一次，以防万一或用于进一步客户端过滤
+                this.$message.success('考试安排数据获取成功！'); // 成功提示
             } catch (error) {
                 console.error('获取考试安排数据失败:', error);
                 this.$message.error('获取考试安排信息失败，请检查网络或后端服务');
@@ -162,10 +229,12 @@ export default {
         },
 
         /**
-         * 处理查询按钮点击事件
+         * 处理查询按钮点击事件或学期变化
          */
         handleSearch() {
-            // 当点击查询按钮或学期选择框变化时，重新从后端获取数据
+            // **重要：当学期选择变化或点击查询时，将当前选中的正确格式的学期保存到 sessionStorage**
+            sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
+            // 重新从后端获取数据
             this.fetchExamData();
         },
 
