@@ -9,8 +9,8 @@ import java.util.List;
 @Repository
 @Mapper
 public interface ExamMapper {
-    List<Exam>findExam(@Param("sid") String sid, @Param("term") String term);
-    List<Exam>findTeacherExam(@Param("tid") String tid, @Param("term") String term);
+    List<Exam>findExam(@Param("sid") Integer sid, @Param("term") String term);
+    List<Exam>findTeacherExam(@Param("tid") Integer tid, @Param("term") String term);
     List<Exam>findAllExam();
 
 }

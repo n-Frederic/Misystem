@@ -28,48 +28,44 @@
 
             <el-table :data="filteredExams" style="width: 100%" border>
                 <el-table-column
-                    prop="examNumber"
+                    prop="cno"
                     label="序号"
                     width="80">
                 </el-table-column>
                 <el-table-column
-                    prop="examName"
+                    prop="cname"
                     label="考试"
                     width="250">
                 </el-table-column>
                 <el-table-column
-                    prop="course"
-                    label="课程"
+                    prop="day"
+                    label="日期"
                     width="200">
                 </el-table-column>
                 <el-table-column
-                    prop="Time"
+                    prop="period"
                     label="时间">
                 </el-table-column>
                 <el-table-column
-                    prop="venue"
-                    label="地点">
+                    prop="durationMin"
+                    label="时长">
                 </el-table-column>
                 <el-table-column
-                    prop="examMethod"
-                    label="考试方式"
+                    prop="grade"
+                    label="满分"
                     width="100">
                 </el-table-column>
                 <el-table-column
-                    prop="remarks"
-                    label="备注"
+                    prop="location"
+                    label="地点"
                     width="150">
                 </el-table-column>
                 <el-table-column
-                    prop="registrationInfo"
-                    label="报名信息"
+                    prop="req"
+                    label="考试要求"
                     width="100">
                 </el-table-column>
-                <el-table-column
-                    prop="examStatus"
-                    label="考试状态"
-                    width="100">
-                </el-table-column>
+
                 <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
                     </template>
@@ -215,7 +211,7 @@ export default {
 
                 // **确认已将 axios.post 改为 axios.get**
                 // 使用模板字符串拼接 URL 更清晰
-                const response = await axios.get(`http://localhost:10086/exams/findExam/${sid}/${"term"}`);
+                const response = await axios.get(`http://localhost:10086/exams/findExam/${sid}/${term}`);
 
                 this.allExams = response.data; // 假设后端返回的是已过滤的考试列表
                 this.applyFilters(); // 即使后端已过滤，这里也调用一次，以防万一或用于进一步客户端过滤

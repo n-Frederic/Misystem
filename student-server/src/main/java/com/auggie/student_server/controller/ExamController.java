@@ -22,11 +22,12 @@ public class ExamController {
     private ExamService examService;
 
     @GetMapping("/findExam/{sid}/{term}")
-    public List<Exam> findExam(@PathVariable String sid,@PathVariable String term) {
+    public List<Exam> findExam(@PathVariable Integer sid,@PathVariable String term) {
+        System.out.println("controller: sid: "+sid+" "+"term "+term);
         return examService.findExam(sid,term);
     }
     @GetMapping("/findTeacherExam/{tid}/{term}")
-    public List<Exam> findTeacherExam(@PathVariable String tid,@PathVariable String term) {
+    public List<Exam> findTeacherExam(@PathVariable Integer tid,@PathVariable String term) {
         return examService.findTeacherExam(tid,term);
     }
 
