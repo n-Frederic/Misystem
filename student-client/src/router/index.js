@@ -43,7 +43,7 @@ import teacherGradeCourseList from "@/views/Teacher/teacherGradeCourseManage/tea
 import teacherEditorGradeCourse from "@/views/Teacher/teacherGradeCourseManage/teacherEditorGradeCourse";
 import updateInfo from "@/components/updateInfo";
 import examManage from "@/views/Admin/examManage/index";
-import queryExam from "@/views/Admin/examManage/queryExam";
+import queryExam from "@/views/Admin/examManage/AdminQueryExam.vue";
 import editorExam from "@/views/Admin/examManage/editorExam";
 import queryExam1 from "@/views/Student/My-Exam/queryExam1";
 
