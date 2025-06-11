@@ -6,6 +6,24 @@
     <select id="findExam" resultType="Exam">
         SELECT *
         FROM studentms.exam
+
+            INNER JOIN studentms.sc sc ON exam.cno = sc.cno
+
+        WHERE sc.sid = #{sid} AND sc.term = #{term}
+    </select>
+
+    <select id="findTeacherExam" resultType="Exam">
+        SELECT *
+        FROM studentms.exam
+
+                 INNER JOIN studentms.ct ct ON exam.cno = ct.cno
+
+        WHERE ct.tid = #{tid} AND ct.term = #{term}
+    </select>
+
+    <select id="findAllExam" resultType="Exam">
+        SELECT *
+        FROM studentms.exam
     </select>
 
 

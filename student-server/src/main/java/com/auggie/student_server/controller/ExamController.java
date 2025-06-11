@@ -21,9 +21,18 @@ public class ExamController {
     @Autowired
     private ExamService examService;
 
-    @GetMapping("/findExam")
-    public List<Exam> findExam() {
-        return examService.findExam();
+    @GetMapping("/findExam/{sid}/{term}")
+    public List<Exam> findExam(@PathVariable String sid,@PathVariable String term) {
+        return examService.findExam(sid,term);
+    }
+    @GetMapping("/findTeacherExam/{tid}/{term}")
+    public List<Exam> findTeacherExam(@PathVariable String tid,@PathVariable String term) {
+        return examService.findTeacherExam(tid,term);
+    }
+
+    @GetMapping("/findAllExam")
+    public List<Exam> findAllExam() {
+        return examService.findAllExam();
     }
 
 }
