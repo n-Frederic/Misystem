@@ -72,7 +72,7 @@ export default {
   },
   created() {
     const that = this;
-    axios.get('http://localhost:10086/exam/findAllExam').then(function (resp) {
+    axios.get('http://localhost:10086/exams/findAllExam').then(function (resp) {
       that.tableData = resp.data;
     }).catch(function (e) {
       that.$message({
@@ -85,7 +85,7 @@ export default {
   methods: {
     deleteExam(row) {
       const that = this;
-      axios.get('http://localhost:10086/exam/deleteById/' + row.cno).then(function (resp) {
+      axios.get('http://localhost:10086/exams/deleteById/' + row.cno).then(function (resp) {
         if (resp.data === true) {
           that.$message({
             showClose: true,
