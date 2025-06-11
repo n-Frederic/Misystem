@@ -14,6 +14,11 @@ public class CourseTeacher {
     private Integer cid;
     private Integer tid;
     private String term;
+    private Integer day;
+    private Integer period;
+    private Integer capacity;
+    private Integer selected;
+    private String location;
 
     public String getTerm() {
         return term;
@@ -33,6 +38,45 @@ public class CourseTeacher {
 
     public void setTid(Integer tid) {
         this.tid = tid;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public Integer getDay() {
+        return day;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setDay(Integer day) {
+
+    }
+
+    public void setPeriod(Integer period) {
+        this.period = period;
+    }
+
+    public void setSelected(Integer selected) {
+        this.selected = selected;
+    }
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
+    public Integer getPeriod() {
+        return period;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Integer getSelected() {
+        return selected;
     }
 
     public Integer getCid() {

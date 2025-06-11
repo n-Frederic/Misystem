@@ -28,7 +28,7 @@
           width="150">
       </el-table-column>
       <el-table-column
-          prop="tTime"
+          prop="day"
           label="星期"
           width="150">
       </el-table-column>
@@ -167,7 +167,7 @@ export default {
                       cname: item.cname,
                       tid: item.tid,
                       tname: item.tname,
-                      tTime: item.tTime,
+                      day: item.day,
                       period: item.period,
                       ccredit: item.ccredit,
                       term: item.term,

@@ -9,9 +9,9 @@
             ct.cno,
             c.cname,
             t.tname,
-            c.location,
-            c.day,
-            c.period
+            ct.location,
+            ct.day,
+            ct.period
         FROM studentms.sc sc
                  INNER JOIN studentms.ct ct ON sc.cno = ct.cno
                  INNER JOIN studentms.c c ON ct.cid = c.cid

@@ -15,6 +15,8 @@ public class CourseTeacherInfo {
     private Integer tid;
     private String cname;
     private String tname;
+    private Integer day;
+    private String period;
     private Integer ccredit;
     private Float grade;
 
@@ -25,6 +27,21 @@ public class CourseTeacherInfo {
     public void setCno(Integer cno) { this.cno = cno; }
 
 
+    public String getPeriod() {
+        return period;
+    }
+
+    public void settTime(Integer tTime) {
+        this.day = tTime;
+    }
+
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+
+    public Integer gettTime() {
+        return day;
+    }
 
     public String getCname() { return cname; }
     public void setCname(String cname) { this.cname = cname; }

@@ -57,7 +57,7 @@
 
     <!-- 查询开课信息详情 -->
     <select id="findCourseTeacherInfo" resultType="CourseTeacherInfo">
-        SELECT ct.cno, c.cname, t.tid, t.tname, c.ccredit, ct.term
+        SELECT ct.cno, c.cname, t.tid, t.tname, ct.day,ct.period
         FROM studentms.c c
         INNER JOIN studentms.ct ct ON c.cid = ct.cid
         INNER JOIN studentms.t t ON ct.tid = t.tid
