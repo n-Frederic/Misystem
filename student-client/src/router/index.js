@@ -45,7 +45,7 @@ import updateInfo from "@/components/updateInfo";
 import examManage from "@/views/Admin/examManage/index";
 import queryExam from "@/views/Admin/examManage/queryExam";
 import editorExam from "@/views/Admin/examManage/editorExam";
-import queryExam1 from "@/views/Student/My-Exam/queryExam";
+import queryExam1 from "@/views/Student/My-Exam/queryExam1";
 
 Vue.use(VueRouter)
 
@@ -229,7 +229,7 @@ const routes = [
           {
             path: '/queryExam',
             name: '考试查询',
-            component: queryExam1,
+            component: queryExam,
             meta: { requireAuth: true },
           },
           {
@@ -387,9 +387,9 @@ const routes = [
         meta: {requireAuth: true},
         children: [
           {
-            path: '/queryExam',
+            path: '/queryExam1',
             name: '考试安排',
-            component: queryExam,
+            component: queryExam1,
             meta: {requireAuth: true}
           },
         ]

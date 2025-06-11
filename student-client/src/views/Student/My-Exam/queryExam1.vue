@@ -12,10 +12,10 @@
             <div class="search-panel">
                 <el-select v-model="searchForm.yearSemester" placeholder="请选择学期" @change="handleSearch">
                     <el-option
-                        v-for="semester in semesterOptions"
-                        :key="semester"
-                        :label="semester"
-                        :value="semester">
+                            v-for="semester in semesterOptions"
+                            :key="semester"
+                            :label="semester"
+                            :value="semester">
                     </el-option>
                 </el-select>
                 <el-input v-model="searchForm.examName" placeholder="考试名称" clearable></el-input>
@@ -24,14 +24,49 @@
             </div>
 
             <el-table :data="filteredExams" style="width: 100%" border>
-                <el-table-column prop="examNumber" label="序号" width="80"></el-table-column>
-                <el-table-column prop="examName" label="考试" width="250"></el-table-column>
-                <el-table-column prop="course" label="课程" width="200"></el-table-column>
-                <el-table-column prop="venue" label="时间地点"></el-table-column>
-                <el-table-column prop="examMethod" label="考试方式" width="100"></el-table-column>
-                <el-table-column prop="remarks" label="备注" width="150"></el-table-column>
-                <el-table-column prop="registrationInfo" label="报名信息" width="100"></el-table-column>
-                <el-table-column prop="examStatus" label="考试状态" width="100"></el-table-column>
+                <el-table-column
+                        prop="examNumber"
+                        label="序号"
+                        width="80">
+                </el-table-column>
+                <el-table-column
+                        prop="examName"
+                        label="考试"
+                        width="250">
+                </el-table-column>
+                <el-table-column
+                        prop="course"
+                        label="课程"
+                        width="200">
+                </el-table-column>
+                <el-table-column
+                        prop="Time"
+                        label="时间">
+                </el-table-column>
+                <el-table-column
+                        prop="venue"
+                        label="地点">
+                </el-table-column>
+                <el-table-column
+                        prop="examMethod"
+                        label="考试方式"
+                        width="100">
+                </el-table-column>
+                <el-table-column
+                        prop="remarks"
+                        label="备注"
+                        width="150">
+                </el-table-column>
+                <el-table-column
+                        prop="registrationInfo"
+                        label="报名信息"
+                        width="100">
+                </el-table-column>
+                <el-table-column
+                        prop="examStatus"
+                        label="考试状态"
+                        width="100">
+                </el-table-column>
                 <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
                     </template>
