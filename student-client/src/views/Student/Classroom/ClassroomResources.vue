@@ -6,14 +6,9 @@
             </div>
 
             <div class="search-panel">
-                <el-select v-model="searchForm.semester" placeholder="选择学期" @change="handleSearch" size="small">
-                    <el-option
-                        v-for="item in semesterOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
+        <span class="current-semester-display">
+          当前学期: {{ searchForm.yearSemester || '加载中...' }}
+        </span>
 
                 <el-select v-model="searchForm.week" placeholder="选择周次" @change="handleSearch" size="small">
                     <el-option
@@ -78,6 +73,11 @@
                         </div>
                     </div>
                 </div>
+                <div v-if="!paginatedClassroomData || paginatedClassroomData.length === 0" class="no-data-message">
+                    <div style="grid-column: 1 / span 8; text-align: center; padding: 20px;">
+                        暂无教室占用数据
+                    </div>
+                </div>
             </div>
 
             <el-pagination
@@ -102,41 +102,56 @@ export default {
     data() {
         return {
             searchForm: {
-                semester: '2024-2025-2', // 默认学期
-                week: 16,               // 默认周次
-                building: '',           // 默认教学楼
-                classroom: ''           // 默认教室号
+                yearSemester: '', // 用于存储当前学期
+                week: 16, // 默认周次设置为第16周，方便调试看到数据，与目标图 image_d4e27a.png 保持一致
+                building: '', // 默认空字符串，对应“全部教学楼”
+                classroom: ''
             },
-            semesterOptions: [
-                { label: '2024-2025-2', value: '2024-2025-2' },
-                { label: '2023-2024-1', value: '2023-2024-1' },
-            ],
             buildingOptions: [
                 { label: '全部教学楼', value: '' },
-                { label: '源西楼', value: 'YX' },
-                { label: '未教学楼', value: 'WJ' },
+                { label: '思源楼', value: 'SY' },
+                { label: '逸夫教学楼', value: 'YF' },
+                { label: '建艺楼', value: 'JY' },
             ],
             daysOfWeek: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
-            sessionsPerDay: 7, // 每天的节次数，根据图片，每格代表一节
+            sessionsPerDay: 7,
 
-            allOccupancyData: [], // 存储从后端获取的原始完整数据
-            filteredOccupancyData: [], // 存储经过筛选后的数据
-            paginatedClassroomData: [], // 存储当前页显示的数据
+            allOccupancyData: [],
+            filteredOccupancyData: [],
+            paginatedClassroomData: [],
 
-            pageSize: 10, // 每页显示的教室数量
-            currentPage: 1, // 当前页码
-            totalClassrooms: 0, // 教室总数
+            pageSize: 10,
+            currentPage: 1,
+            totalClassrooms: 0,
 
-            currentBaseDate: null, // 用于计算日期
+            currentBaseDate: null, // 当前周的星期一的日期对象
         };
     },
-    created() {
-        this.fetchOccupancyData();
-        this.calculateBaseDate();
+    async created() {
+        await this.fetchCurrentSemester(); // 1. 先获取当前学期
+        this.calculateBaseDate(); // 2. 根据学期和周次计算日期
+        this.fetchOccupancyData(); // 3. 再获取教室占用数据
     },
     methods: {
+        async fetchCurrentSemester() {
+            try {
+                const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
+                const semesters = response.data;
+                if (semesters && semesters.length > 0) {
+                    this.searchForm.yearSemester = semesters[0]; // 假设后端返回的第一个是当前学期
+                } else {
+                    this.searchForm.yearSemester = '25-春季学期'; // 回退到默认值
+                    this.$message.warning('未能从后端获取到学期信息，已使用默认学期。');
+                }
+            } catch (error) {
+                console.error('获取学期信息失败:', error);
+                this.$message.error('获取学期信息失败，请检查网络或后端服务');
+                this.searchForm.yearSemester = '25-春季学期'; // API调用失败时的回退
+            }
+        },
+
         async fetchOccupancyData() {
-            // 真实后端API调用示例
+            // 真实后端API调用示例 (请在生产环境使用)
             // try {
             //   const response = await axios.get('/api/classroom-occupancy', { params: this.searchForm });
             //   this.allOccupancyData = response.data;
@@ -145,12 +160,11 @@ export default {
             //   console.error('获取教室占用数据失败:', error);
             //   this.$message.error('获取教室占用数据失败');
             //   this.allOccupancyData = [];
-            //   this.applyFilters();
             // }
 
-            // 以下是模拟数据，用于演示。
+            // 以下是模拟数据，用于演示和调试。请在真实项目中删除或注释掉。
             const mockData = [];
-            const buildings = { 'YX': '源西楼', 'WJ': '未教学楼', 'JS': '建设楼' };
+            const buildings = { 'SY': '思源楼', 'YF': '逸夫教学楼', 'JY': '建艺楼' };
             let roomCounter = 101;
 
             for (let bCode in buildings) {
@@ -172,8 +186,8 @@ export default {
                 }
             }
 
-            this.allOccupancyData = mockData;
-            this.applyFilters();
+            this.allOccupancyData = mockData; // 填充模拟数据
+            this.applyFilters(); // 应用筛选并更新分页数据
         },
 
         applyFilters() {
@@ -195,7 +209,7 @@ export default {
 
             this.filteredOccupancyData = filtered;
             this.totalClassrooms = filtered.length;
-            this.currentPage = 1;
+            this.currentPage = 1; // 筛选条件变化时重置页码
             this.updatePaginatedData();
         },
 
@@ -206,10 +220,9 @@ export default {
         },
 
         handleSearch() {
-            // 筛选条件变化时，重新应用筛选（而不是重新拉取所有数据，如果后端支持前端筛选）
-            // 如果后端只根据学期和周次返回数据，那么学期周次变化时才需要fetchOccupancyData
-            // 这里为了演示，每次查询都重新模拟所有数据并筛选
-            this.fetchOccupancyData();
+            // 触发筛选，如果需要重新从后端获取数据，则调用 fetchOccupancyData()
+            // 如果只是前端筛选，则调用 applyFilters()
+            this.applyFilters();
         },
 
         handlePageChange(newPage) {
@@ -237,7 +250,36 @@ export default {
         },
 
         calculateBaseDate() {
-            const semesterStartDate = new Date('2024-09-02'); // 2024年9月2日是星期一
+            if (!this.searchForm.yearSemester) {
+                this.currentBaseDate = null;
+                return;
+            }
+
+            let semesterStartDate;
+            const yearMatch = this.searchForm.yearSemester.match(/^(\d{2})/); // 匹配开头的两位数字
+            let yearPrefix = new Date().getFullYear(); // 默认当前年份作为备用
+
+            if (yearMatch && yearMatch[1]) {
+                yearPrefix = parseInt(yearMatch[1], 10);
+                // 假设两位数年份在 70 以下是 20XX 年 (如 25 -> 2025)，否则是 19XX 年 (如 98 -> 1998)
+                yearPrefix = (yearPrefix < 70) ? (2000 + yearPrefix) : (1900 + yearPrefix);
+            }
+            const fullYear = yearPrefix; // 最终的完整年份
+
+            if (this.searchForm.yearSemester.includes('春季学期')) {
+                semesterStartDate = new Date(fullYear, 1, 24); // 2月24日 (月份是0-indexed，1代表2月)
+            } else if (this.searchForm.yearSemester.includes('秋季学期')) {
+                semesterStartDate = new Date(fullYear, 8, 1); // 9月1日 (月份是0-indexed，8代表9月)
+            } else {
+                console.warn('无法识别的学期格式，使用默认起始日期。');
+                semesterStartDate = new Date(fullYear, 0, 1); // 默认年初
+            }
+
+            // 调整为星期一：如果 semesterStartDate 不是星期一，向前调整到最近的星期一
+            const dayOfWeek = semesterStartDate.getDay(); // 0为星期天，1为星期一 ... 6为星期六
+            const daysToMonday = dayOfWeek === 0 ? -6 : -(dayOfWeek - 1); // 如果是星期天，向前调整6天回到上周一；否则，向前调整 (当前星期几 - 1) 天
+            semesterStartDate.setDate(semesterStartDate.getDate() + daysToMonday);
+
             const daysToAdd = (this.searchForm.week - 1) * 7;
             const baseDate = new Date(semesterStartDate);
             baseDate.setDate(baseDate.getDate() + daysToAdd);
@@ -248,14 +290,19 @@ export default {
             if (!this.currentBaseDate) return '';
             const date = new Date(this.currentBaseDate);
             date.setDate(date.getDate() + dayIndex);
+            // 核心修复：确保这里只返回纯文本日期，不包含任何HTML标签
             return `${date.getMonth() + 1}/${date.getDate()}`;
         }
     },
     watch: {
-        'searchForm.week': 'calculateBaseDate',
-        'searchForm.semester': 'fetchOccupancyData',
-        'searchForm.building': 'applyFilters',
-        'searchForm.classroom': 'applyFilters',
+        'searchForm.week': 'calculateBaseDate', // 周次变化时重新计算日期
+        'searchForm.yearSemester': function(newVal, oldVal) {
+            if (newVal !== oldVal && newVal) {
+                this.calculateBaseDate(); // 学期变化时重新计算日期
+            }
+        },
+        'searchForm.building': 'applyFilters', // 教学楼变化时应用筛选
+        'searchForm.classroom': 'applyFilters', // 教室号变化时应用筛选
     }
 };
 </script>
@@ -297,6 +344,14 @@ export default {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
+.current-semester-display {
+    font-size: 14px;
+    color: #606266;
+    font-weight: bold;
+    padding: 0 5px;
+    white-space: nowrap;
+}
+
 .search-panel .el-select,
 .search-panel .el-input {
     width: 160px;
@@ -317,7 +372,7 @@ export default {
     font-weight: bold;
     color: #606266;
     margin-right: 15px;
-    white-space: nowrap; /* 防止图例标题换行 */
+    white-space: nowrap;
 }
 
 .legend-items {
@@ -330,7 +385,7 @@ export default {
     display: inline-flex;
     align-items: center;
     color: #606266;
-    white-space: nowrap; /* 防止单个图例项换行 */
+    white-space: nowrap;
 }
 
 .color-box {
@@ -339,15 +394,14 @@ export default {
     border-radius: 4px;
     margin-right: 8px;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1); /* 增加内阴影使其更立体 */
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
-/* 定义颜色 - 保持一致性 */
-.occupancy-course { background-color: #F56C6C; /* 红色 */ }
-.occupancy-free { background-color: #EBEEF5; /* 浅灰色 */ }
-.occupancy-exam { background-color: #E6A23C; /* 黄色 */ }
-.occupancy-experiment { background-color: #409EFF; /* 蓝色 */ }
-.occupancy-other { background-color: #909399; /* 棕色/深灰色 */ }
+.occupancy-course { background-color: #F56C6C; }
+.occupancy-free { background-color: #EBEEF5; }
+.occupancy-exam { background-color: #E6A23C; }
+.occupancy-experiment { background-color: #409EFF; }
+.occupancy-other { background-color: #909399; }
 
 
 .occupancy-grid {
@@ -357,7 +411,7 @@ export default {
     border-radius: 8px;
     overflow: hidden;
     background-color: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* 添加阴影 */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .grid-header, .grid-row {
@@ -365,7 +419,7 @@ export default {
 }
 
 .grid-cell {
-    border: 1px solid #EBEEF5; /* 更细的网格线 */
+    border: 1px solid #EBEEF5;
     box-sizing: border-box;
     text-align: center;
     display: flex;
@@ -374,7 +428,7 @@ export default {
     flex-direction: column;
     font-size: 14px;
     color: #606266;
-    padding: 0; /* 单元格内部的padding由内容控制 */
+    padding: 0;
 }
 
 .time-header {
@@ -385,11 +439,10 @@ export default {
 .day-header {
     background-color: #F5F7FA;
     font-weight: bold;
-    position: relative; /* 用于定位节次编号 */
-    padding-top: 8px; /* 为日期和节次编号留出空间 */
+    position: relative;
+    padding-top: 8px;
     padding-bottom: 8px;
 }
-/* 最后一个星期头部右侧圆角 */
 .grid-header .grid-cell:last-child {
     border-top-right-radius: 8px;
 }
@@ -398,36 +451,34 @@ export default {
     font-size: 12px;
     color: #909399;
     margin-top: 4px;
-    margin-bottom: 8px; /* 和节次编号分离 */
+    margin-bottom: 8px;
 }
 
 .session-numbers {
     display: flex;
-    justify-content: space-around; /* 均匀分布节次编号 */
+    justify-content: space-around;
     width: 100%;
     font-size: 12px;
     color: #909399;
-    border-top: 1px solid #DCDFE6; /* 节次编号上方加线 */
+    border-top: 1px solid #DCDFE6;
     padding-top: 4px;
 }
 .session-numbers span {
-    flex: 1; /* 每个节次编号占据等宽 */
+    flex: 1;
     text-align: center;
 }
-
 
 .classroom-label {
     background-color: #F5F7FA;
     font-weight: bold;
-    padding: 8px 5px; /* 教室标签有自己的内边距 */
-    white-space: nowrap; /* 防止教室名称换行 */
+    padding: 8px 5px;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .occupancy-day-cell {
     display: grid;
-    /* 使用 grid-template-rows: repeat(7, 1fr) 确保每个小格子高度平分 */
     grid-template-rows: repeat(v-bind(sessionsPerDay), 1fr);
     padding: 0;
     border: none;
@@ -435,21 +486,19 @@ export default {
 
 .occupancy-day-cell > div {
     width: 100%;
-    /* min-height: 28px; /* 调整为更小的高度，根据图片估计 */
-    height: auto; /* 让内容决定高度，但父容器会平均分配 */
-    border: 1px solid #DCDFE6; /* 明显的分隔线 */
-    border-width: 0 1px 1px 0; /* 只在右侧和下方有边框 */
+    height: auto;
+    border: 1px solid #DCDFE6;
+    border-width: 0 1px 1px 0;
     box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 12px; /* 格子内的文字大小 */
+    font-size: 12px;
     cursor: pointer;
     transition: background-color 0.2s ease;
     color: #303133;
 }
 
-/* 移除每列最右侧的垂直线，和每行最下方的水平线 */
 .occupancy-day-cell:last-child > div {
     border-right-width: 0;
 }
@@ -457,6 +506,14 @@ export default {
     border-bottom-width: 0;
 }
 
+.no-data-message {
+    grid-column: 1 / span 8; /* 让消息横跨整个表格 */
+    text-align: center;
+    padding: 40px 0;
+    color: #909399;
+    font-size: 16px;
+    background-color: #ffffff;
+}
 
 .pagination-bottom {
     margin-top: 20px;

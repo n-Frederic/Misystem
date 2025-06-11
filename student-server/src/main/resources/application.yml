@@ -4,9 +4,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/studentms?setUnicode=true&characterEncoding=utf8&useAffectedRows=true
+    url: jdbc:mysql://43.138.82.124:3306/studentms?setUnicode=true&characterEncoding=utf8&useAffectedRows=true
     username: root
-    password: Jnh@9372
+    password: bxszb
 
 mybatis:
   type-aliases-package: com.auggie.student_server.entity
