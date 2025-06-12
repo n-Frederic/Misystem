@@ -29,6 +29,11 @@
         </where>
     </select>
 
+    <select id="findBySearch" resultType="classroomUseInfo">
+        SELECT location, day, period
+        from studentms.c
+    </select>
+
     <update id="updateById">
         UPDATE studentms.c
         SET cname = #{course.cname},

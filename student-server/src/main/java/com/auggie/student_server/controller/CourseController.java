@@ -43,4 +43,9 @@ public class CourseController {
         return courseService.updateById(course);
     }
 
+    @GetMapping("/getAllCourses")
+    public boolean getAllCourses() {
+        return courseService.getAllCourses();
+    }
+
 }

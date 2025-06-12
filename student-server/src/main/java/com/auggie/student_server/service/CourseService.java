@@ -78,5 +78,9 @@ public class CourseService {
         return courseMapper.deleteById(cid);
     }
 
+    public boolean getAllCourses() {
+        return courseMapper.getAllCourses();
+    }
+
 
 }

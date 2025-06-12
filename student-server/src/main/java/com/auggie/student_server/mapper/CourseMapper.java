@@ -24,4 +24,6 @@ public interface CourseMapper {
 
 //    delete
     public boolean deleteById(@Param("cid") Integer cid);
+
+    public boolean getAllCourses();
 }
