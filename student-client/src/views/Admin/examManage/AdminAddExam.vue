@@ -92,7 +92,7 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          预留后端接口调用
+  
           axios.post('http://localhost:10086/exams/add', this.ruleForm).then(resp => {
             if (resp.data === true) {
               this.$message({ showClose: true, message: '发布成功', type: 'success' });
