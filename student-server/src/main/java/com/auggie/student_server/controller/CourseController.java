@@ -1,6 +1,7 @@
 package com.auggie.student_server.controller;
 
 import com.auggie.student_server.entity.Course;
+import com.auggie.student_server.entity.classroomUseInfo;
 import com.auggie.student_server.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class CourseController {
     }
 
     @GetMapping("/getAllCourses")
-    public boolean getAllCourses() {
+    public List<classroomUseInfo> getAllCourses() {
         return courseService.getAllCourses();
     }
 

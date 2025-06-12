@@ -14,7 +14,7 @@
     </select>
 
     <select id="findBySearch" resultType="scInfo">
-        SELECT ct.cno,c.cid, c.cname, t.tid, t.tname, s.sid, s.sname, sc., sc.term
+        SELECT ct.cno,c.cid, c.cname, t.tid, t.tname, s.sid, s.sname, sc.daily_grade, sc.term
         FROM studentms.sc sc
                 INNER JOIN studentms.s s ON sc.sid = s.sid
                 INNER JOIN studentms.ct ct ON sc.cno = ct.cno

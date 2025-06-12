@@ -1,6 +1,7 @@
 package com.auggie.student_server.service;
 
 import com.auggie.student_server.entity.Course;
+import com.auggie.student_server.entity.classroomUseInfo;
 import com.auggie.student_server.mapper.CourseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,7 +79,7 @@ public class CourseService {
         return courseMapper.deleteById(cid);
     }
 
-    public boolean getAllCourses() {
+    public List<classroomUseInfo> getAllCourses() {
         return courseMapper.getAllCourses();
     }
 

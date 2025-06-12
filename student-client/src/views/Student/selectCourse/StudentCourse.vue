@@ -78,7 +78,7 @@ export default {
   methods: {
       fetchTerms() {
           const that = this;
-          axios.get('http://localhost:10086/SCT/findAllTerm')
+          axios.get('http://localhost:10086/SC/findAllTerm')
               .then(response => {
                   that.terms = response.data; // 假设后端返回的数据是一个包含学期对象的数组
                   // 确保设置默认学期在获取到学期数据之后
