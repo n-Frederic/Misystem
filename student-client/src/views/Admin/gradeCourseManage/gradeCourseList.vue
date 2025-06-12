@@ -122,7 +122,7 @@ export default {
       this.$router.push({
         path: '/editorGradeCourse',
         query: {
-          cid: row.cid,
+          cno: row.cno,
           tid: row.tid,
           sid: row.sid,
           term: row.term
