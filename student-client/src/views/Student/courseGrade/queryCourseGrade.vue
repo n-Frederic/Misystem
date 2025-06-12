@@ -39,7 +39,7 @@
             width="150">
         </el-table-column>
         <el-table-column
-            prop="grade"
+            prop="daily_grade"
             label="成绩"
             width="150">
         </el-table-column>
