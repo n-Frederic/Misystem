@@ -46,7 +46,7 @@ import examManage from "@/views/Admin/examManage/index";
 import queryExam from "@/views/Admin/examManage/AdminQueryExam.vue";
 import editorExam from "@/views/Admin/examManage/editorExam";
 import queryExam1 from "@/views/Student/My-Exam/queryExam1";
-import addExam from "@/views/Admin/examManage/addExam";
+import addExam from "@/views/Admin/examManage/AdminAddExam.vue";
 
 Vue.use(VueRouter)
 

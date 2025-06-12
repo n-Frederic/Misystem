@@ -49,22 +49,42 @@ export default {
     };
     return {
       ruleForm: {
-        cno: null,
-        day: null,
-        period: null,
-        durationMin: null,
-        grade: null,
-        location: null,
-        Req: null
+        exam: {
+          cno: null,
+          day: null,
+          period: null,
+          durationMin: null,
+          grade: null,
+          location: null,
+          req: null
+        }
       },
       rules: {
-        cno: [{ required: true, message: '请输入课程编号', trigger: 'change' }, { type: 'number', message: '请输入数字', trigger: 'change' }],
-        day: [{ required: true, message: '请选择考试日期', trigger: 'change' }],
-        period: [{ required: true, message: '请输入考试时段', trigger: 'change' }, { validator: checkNumber, trigger: 'blur' }],
-        durationMin: [{ required: true, message: '请输入考试时长', trigger: 'change' }, { validator: checkNumber, trigger: 'blur' }],
-        grade: [{ required: true, message: '请输入考试总分', trigger: 'change' }, { validator: checkGrade, trigger: 'blur' }],
-        location: [{ required: false, message: '请输入考试地点', trigger: 'change' }],
-        Req: [{ required: true, message: '请输入考试要求', trigger: 'change' }]
+        'exam.cno': [
+          { required: true, message: '请输入课程编号', trigger: 'change' },
+          { type: 'number', message: '请输入数字', trigger: 'change' }
+        ],
+        'exam.day': [
+          { required: true, message: '请选择考试日期', trigger: 'change' }
+        ],
+        'exam.period': [
+          { required: true, message: '请输入考试时段', trigger: 'change' },
+          { validator: checkNumber, trigger: 'blur' }
+        ],
+        'exam.durationMin': [
+          { required: true, message: '请输入考试时长', trigger: 'change' },
+          { validator: checkNumber, trigger: 'blur' }
+        ],
+        'exam.grade': [
+          { required: true, message: '请输入考试总分', trigger: 'change' },
+          { validator: checkGrade, trigger: 'blur' }
+        ],
+        'exam.location': [
+          { required: false, message: '请输入考试地点', trigger: 'change' }
+        ],
+        'exam.req': [
+          { required: true, message: '请输入考试要求', trigger: 'change' }
+        ]
       }
     };
   },

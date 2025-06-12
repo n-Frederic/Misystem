@@ -91,7 +91,7 @@ export default {
     this.ruleForm.cno = this.$route.query.cno;
     // 预留接口调用：获取考试详情
     // const that = this;
-    // axios.get('http://localhost:10086/exam/findById/' + this.ruleForm.cno).then(function (resp) {
+    // axios.get('http://localhost:10086/exams/findById/' + this.ruleForm.cno).then(function (resp) {
     //   that.ruleForm = resp.data;
     // }).catch(function (e) {
     //   that.$message({
@@ -107,7 +107,7 @@ export default {
         if (valid) {
           // 预留提交接口
           // const that = this;
-          // axios.post('http://localhost:10086/exam/update', that.ruleForm).then(function (resp) {
+          // axios.post('http://localhost:10086/exams/update', that.ruleForm).then(function (resp) {
           //   if (resp.data === true) {
           //     that.$message({
           //       showClose: true,
