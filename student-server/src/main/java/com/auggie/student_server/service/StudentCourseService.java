@@ -59,8 +59,9 @@ public class StudentCourseService {
     }
 
 
-    public boolean updateById(Integer sid, Integer cid, Integer tid, String term, Integer grade) {
-        return studentCourseMapper.updateById(sid, cid, term, grade);
+    public boolean updateById(Integer sid, Integer cno, String term, Integer grade) {
+        System.out.println("sid"+sid+"cno"+cno+"term"+term+"grade"+grade);
+        return studentCourseMapper.updateById(sid, cno, term, grade);
     }
 //tid到底要不要用
 

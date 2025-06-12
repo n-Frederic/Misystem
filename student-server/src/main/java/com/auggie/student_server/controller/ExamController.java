@@ -39,6 +39,18 @@ public class ExamController {
         List<Exam> exams = examService.findTeacherExam(tid,term);
         return exams;
     }
+    @GetMapping("/deleteById/{cno}")
+    public boolean deleteById(@PathVariable Integer cno) {  // 或 Integer cno，取决于cno的类型
+        try {
+            // 调用service层删除逻辑
+            boolean result = examService.deleteById(cno);
+            System.out.println("cno"+cno);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     @GetMapping("/findAllExam")
     public List<Exam> findAllExam() {

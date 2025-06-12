@@ -42,6 +42,11 @@ public List<Exam> findExam(Integer sid, String term){
         List<Exam> list = examMapper.findAllExam();
         return list;
     }
+    public boolean deleteById(Integer cno){
+
+    boolean result=examMapper.deleteById(cno);
+    return result;
+    }
     public boolean insertExam(Integer cno, java.util.Date day, Integer period, Integer durationMin, Float grade, String location, String req) {
 
 

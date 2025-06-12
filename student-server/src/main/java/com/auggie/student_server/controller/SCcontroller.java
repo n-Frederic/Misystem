@@ -57,13 +57,14 @@ public class SCcontroller {
         return studentCourseService.findByIdWithTerm(sid, cno, tid, term);
     }
 
-    @GetMapping("/updateById/{sid}/{cid}/{tid}/{term}/{grade}")
+    @GetMapping("/updateById/{sid}/{cno}/{term}/{grade}")
     public boolean updateById(@PathVariable Integer sid,
-                              @PathVariable Integer cid,
-                              @PathVariable Integer tid,
+                              @PathVariable Integer cno,
+
                               @PathVariable String term,
                               @PathVariable Integer grade) {
-        return studentCourseService.updateById(sid, cid, tid, term, grade);
+        System.out.println("sid+"+sid+"cno"+cno+"term"+term+"grade"+grade);
+        return studentCourseService.updateById(sid, cno,  term, grade);
     }
 
     @GetMapping("/deleteById/{sid}/{cid}/{tid}/{term}")
