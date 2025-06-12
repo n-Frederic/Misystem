@@ -41,7 +41,7 @@
         <div v-else>
             <div class="legend">
                 <span>图例:</span>
-                <span class="legend-item occupied-legend"></span><span>已占用</span>
+                <span class="legend-item occupied-legend"></span><span>课程占用</span>
                 <span class="legend-item available-legend"></span><span>空闲</span>
             </div>
 
@@ -66,7 +66,7 @@
                     <td v-for="(day, dayIndex) in daysOfWeek" :key="day">
                         <div class="periods-row">
                             <div v-for="period in 7" :key="period"
-                                 :class="getClassroomStatus(location, dayIndex + 1, period)">
+                                 :class="getCellStatus(location, dayIndex + 1, period)">
                             </div>
                         </div>
                     </td>
@@ -100,11 +100,9 @@
 <script>
 import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
-// 如果你使用了 Element Plus 的分页组件，请确保已安装并在此处导入
 // import { ElPagination, ElMessage } from 'element-plus';
 
 export default {
-    // 如果使用 Element Plus 分页，需要注册组件
     // components: {
     //   ElPagination,
     // },
@@ -112,7 +110,8 @@ export default {
         // --- 数据 ---
         const semesters = ref([]);
         const selectedSemester = ref(null);
-        const classroomData = ref([]);
+        const courseData = ref([]);
+        const examData = ref([]);
         const loading = ref(false);
         const errorMessage = ref('');
         const searchLocation = ref('');
@@ -123,31 +122,29 @@ export default {
             'SY': '思源教学楼',
             'JY': '建艺教学楼',
             'DQ': '东区教学楼'
-            // 可以在这里添加更多教学楼
         });
-        const selectedBuildingPrefix = ref(''); // 默认值为 ''，对应 "-全部教学楼-"
+        const selectedBuildingPrefix = ref('');
 
         // --- 周数控制 ---
-        const currentWeekIndex = ref(0); // 当前周的索引 (0-based)
-        const weeksInSemester = ref(18); // 假设一个学期有18周
+        const currentWeekIndex = ref(0);
+        const weeksInSemester = ref(20);
 
         // --- 日期计算基准 ---
-        // 2025年2月24日是星期一
         const FIRST_WEEK_MONDAY_2025 = new Date('2025-02-24T00:00:00');
 
         // --- 教学楼分页 ---
-        const totalFloors = ref(6); // 假设每种教学楼总共有6层 (1xx - 6xx)
-        const classroomsPerFloor = 10; // 每层教室数量 (例如 YF101 - YF110)
-        const currentFloorPage = ref(1); // 当前教学楼分页的页码 (1-based)
-        const pageSize = ref(classroomsPerFloor); // 每页显示10个教室 (即1层)
-        const jumperPage = ref(1); // 跳转页码输入框的值
+        const totalFloors = ref(6);
+        const classroomsPerFloor = 10;
+        const currentFloorPage = ref(1);
+        const pageSize = ref(classroomsPerFloor);
+        const jumperPage = ref(1);
 
         // 生成所有教学楼教室的完整列表 (或当前选中教学楼的列表)
         const allClassrooms = computed(() => {
             const rooms = [];
             const prefixesToGenerate = selectedBuildingPrefix.value === ''
-                ? Object.keys(buildingMap.value) // 如果是全部，则遍历所有前缀
-                : [selectedBuildingPrefix.value]; // 否则只使用当前选中的前缀
+                ? Object.keys(buildingMap.value)
+                : [selectedBuildingPrefix.value];
 
             prefixesToGenerate.forEach(prefix => {
                 for (let floor = 1; floor <= totalFloors.value; floor++) {
@@ -160,12 +157,12 @@ export default {
                     }
                 }
             });
-            return rooms.sort(); // 确保教室号排序
+            return rooms.sort();
         });
 
         // 根据当前页码和搜索条件过滤并获取当前楼层的教室列表
         const pagedLocations = computed(() => {
-            let filteredBySearch = allClassrooms.value; // 从所有（或特定教学楼）教室中过滤
+            let filteredBySearch = allClassrooms.value;
 
             if (searchLocation.value) {
                 filteredBySearch = filteredBySearch.filter(location =>
@@ -173,7 +170,6 @@ export default {
                 );
             }
 
-            // 如果搜索结果为空，显示一个空数组
             if (filteredBySearch.length === 0) {
                 return [];
             }
@@ -186,7 +182,7 @@ export default {
 
         // 计算当前经过教学楼选择和搜索过滤后的总教室数（用于分页器的total属性）
         const totalPagedLocationsCount = computed(() => {
-            let filteredBySearch = allClassrooms.value; // 从所有（或特定教学楼）教室中过滤
+            let filteredBySearch = allClassrooms.value;
             if (searchLocation.value) {
                 filteredBySearch = filteredBySearch.filter(location =>
                     location.toUpperCase().includes(searchLocation.value.toUpperCase())
@@ -194,7 +190,6 @@ export default {
             }
             return filteredBySearch.length;
         });
-
 
         const daysOfWeek = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
 
@@ -207,6 +202,16 @@ export default {
             date.setDate(date.getDate() + (currentWeekIndex.value * 7));
             date.setDate(date.getDate() + dayIndex);
             return `${date.getMonth() + 1}/${date.getDate()}`;
+        };
+
+        const getFullDateForDay = (dayIndex) => {
+            const date = new Date(FIRST_WEEK_MONDAY_2025);
+            date.setDate(date.getDate() + (currentWeekIndex.value * 7));
+            date.setDate(date.getDate() + dayIndex);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
         };
 
         const fetchSemesters = async () => {
@@ -237,96 +242,137 @@ export default {
 
             loading.value = true;
             errorMessage.value = '';
-            classroomData.value = [];
+            courseData.value = [];
+            examData.value = [];
 
             try {
-                const params = {
-                    yearSemester: selectedSemester.value,
-                    week: currentWeekIndex.value + 1,
-                };
+                // --- 1. 获取课程占用数据 ---
+                // 只有当当前周数在1-16周范围内时才请求课程数据
+                if (currentWeekIndex.value + 1 <= 16) {
+                    const courseParams = {
+                        yearSemester: selectedSemester.value,
+                        week: currentWeekIndex.value + 1,
+                    };
+                    if (selectedBuildingPrefix.value !== '') {
+                        courseParams.buildingPrefix = selectedBuildingPrefix.value;
+                        courseParams.floor = currentFloorPage.value;
+                    }
+                    if (searchLocation.value) {
+                        courseParams.keywordLocation = searchLocation.value;
+                    }
 
-                // 关键点：如果选择了“全部教学楼”，则不传递 buildingPrefix，让后端返回所有数据
-                // 如果后端支持，也可以传递一个 buildingPrefixes 数组
-                if (selectedBuildingPrefix.value !== '') {
-                    params.buildingPrefix = selectedBuildingPrefix.value;
-                    // 传递楼层参数 (如果后端按楼层分页)
-                    params.floor = currentFloorPage.value;
+                    const courseResponse = await axios.get('http://localhost:10086/course/getAllCourses', { params: courseParams });
+                    courseData.value = courseResponse.data;
                 } else {
-                    // 如果是“全部”，并且后端需要特定参数才能返回所有，这里可能需要调整
-                    // 例如：params.getAllBuildings = true;
-                    // 或者：params.buildingPrefixes = Object.keys(buildingMap.value).join(',');
+                    // 如果当前周数大于16周，则清空课程数据
+                    courseData.value = [];
                 }
 
-                // 如果后端支持按教室号模糊查询，可以把 searchLocation 传过去
-                if (searchLocation.value) {
-                    params.keywordLocation = searchLocation.value;
-                }
 
-                // 重要的性能考量：
-                // 如果后端不支持按 buildingPrefix/floor/keywordLocation 过滤，
-                // 那么此接口会返回所有教室的占用数据。
-                // 这将导致 classroomData.value 包含大量数据，前端内存和渲染压力增大。
-                // 理想情况是后端返回已经过滤和分页好的数据。
-                const response = await axios.get('http://localhost:10086/course/getAllCourses', { params: params });
-
-                classroomData.value = response.data;
+                // --- 2. 获取考试占用数据 (已注释) ---
+                // const examRequests = [];
+                // for (let i = 0; i < 7; i++) {
+                //     const dateStr = getFullDateForDay(i);
+                //     const examParams = {
+                //         semester: selectedSemester.value,
+                //         date: dateStr,
+                //     };
+                //     if (selectedBuildingPrefix.value !== '') {
+                //         examParams.buildingPrefix = selectedBuildingPrefix.value;
+                //         examParams.floor = currentFloorPage.value;
+                //     }
+                //     if (searchLocation.value) {
+                //         examParams.keywordLocation = searchLocation.value;
+                //     }
+                //     examRequests.push(axios.get('http://localhost:10086/classRoom/findExamClassrooms', { params: examParams }));
+                // }
+                // const examResponses = await Promise.all(examRequests);
+                // examData.value = examResponses.flatMap(res => res.data);
 
             } catch (error) {
-                console.error('获取教室占用情况出错:', error);
+                console.error('获取占用情况出错:', error);
                 errorMessage.value = '无法获取教室占用情况，请稍后再试。';
             } finally {
                 loading.value = false;
             }
         };
 
-        const getClassroomStatus = (location, dayNumber, period) => {
-            const isOccupied = classroomData.value.some(item => {
-                return String(item.location) === location &&
-                    item.day === dayNumber &&
-                    item.period === period;
-            });
-            return isOccupied ? 'occupied' : 'available';
+        /**
+         * 根据传入的教室、星期数字和节次判断占用状态，并返回对应的CSS类。
+         * 暂时只考虑课程占用，且课程占用限定在1-16周。
+         * @param {string} location 前端显示的教室名称
+         * @param {number} dayNumber 星期数字 (1=星期一, 7=星期日)
+         * @param {number} period 节次 (1-7)
+         * @returns {string} CSS类名 'occupied' 或 'available'
+         */
+        const getCellStatus = (location, dayNumber, period) => {
+            // 检查考试占用 (已注释)
+            // const isExamOccupied = examData.value.some(item => {
+            //     const cellDate = new Date(FIRST_WEEK_MONDAY_2025);
+            //     cellDate.setDate(cellDate.getDate() + (currentWeekIndex.value * 7) + (dayNumber - 1));
+            //     const year = cellDate.getFullYear();
+            //     const month = (cellDate.getMonth() + 1).toString().padStart(2, '0');
+            //     const day = cellDate.getDate().toString().padStart(2, '0');
+            //     const formattedDate = `${year}-${month}-${day}`;
+
+            //     return String(item.location) === location &&
+            //            item.date === formattedDate &&
+            //            item.period === period;
+            // });
+
+            // 检查课程占用：只有当当前周数在1-16周范围内时才检查课程占用
+            let isCourseOccupied = false;
+            if (currentWeekIndex.value + 1 <= 16) {
+                isCourseOccupied = courseData.value.some(item => {
+                    return String(item.location) === location &&
+                        item.day === dayNumber &&
+                        item.period === period;
+                });
+            }
+
+            // if (isExamOccupied) {
+            //     return 'exam-occupied';
+            // } else
+            if (isCourseOccupied) {
+                return 'occupied';
+            } else {
+                return 'available';
+            }
         };
 
         const handleBuildingChange = () => {
-            currentFloorPage.value = 1; // 切换教学楼时，重置回第一页
-            jumperPage.value = 1; // 重置跳转页码
-            searchLocation.value = ''; // 清空搜索框
-            fetchClassroomStatus(); // 重新获取数据
+            currentFloorPage.value = 1;
+            jumperPage.value = 1;
+            searchLocation.value = '';
+            fetchClassroomStatus();
         };
 
         const handleFloorPageChange = (newPage) => {
             currentFloorPage.value = newPage;
-            jumperPage.value = newPage; // 同步跳转输入框的值
+            jumperPage.value = newPage;
             fetchClassroomStatus();
         };
 
         const jumpToPage = () => {
-            // 确保跳转页码有效
             const maxPage = Math.ceil(totalPagedLocationsCount.value / pageSize.value);
             if (jumperPage.value >= 1 && jumperPage.value <= maxPage) {
                 currentFloorPage.value = jumperPage.value;
                 fetchClassroomStatus();
             } else {
-                // ElMessage.warning(`请输入有效页码，范围在 1 到 ${maxPage} 之间。`);
                 console.warn(`请输入有效页码，范围在 1 到 ${maxPage} 之间。`);
-                jumperPage.value = currentFloorPage.value; // 如果输入无效，还原为当前页
+                jumperPage.value = currentFloorPage.value;
             }
         };
 
-        watch([selectedSemester, currentWeekIndex], () => {
+        watch([selectedSemester, currentWeekIndex, selectedBuildingPrefix], () => {
             if (selectedSemester.value) {
                 fetchClassroomStatus();
             }
         });
 
         watch(searchLocation, () => {
-            // 搜索框内容变化时，将当前页重置为1，并触发数据重新获取
             currentFloorPage.value = 1;
             jumperPage.value = 1;
-            // 如果搜索是前端过滤，这里不需要重新获取数据。
-            // 但因为“全部教学楼”模式下可能涉及到后端数据量大，
-            // 且搜索框可能需要和后端联动，所以这里调用 fetchClassroomStatus 是更安全的做法。
             fetchClassroomStatus();
         });
 
@@ -338,10 +384,10 @@ export default {
         return {
             semesters,
             selectedSemester,
-            classroomData,
+            courseData,
             loading,
             errorMessage,
-            buildingMap, // 暴露 buildingMap 给模板
+            buildingMap,
             selectedBuildingPrefix,
             searchLocation,
             currentWeekIndex,
@@ -355,7 +401,7 @@ export default {
             jumperPage,
             getFormattedDate,
             fetchClassroomStatus,
-            getClassroomStatus,
+            getCellStatus,
             handleBuildingChange,
             handleFloorPageChange,
             jumpToPage,
@@ -368,7 +414,7 @@ export default {
 #classroom-availability {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 25px;
-    max-width: 1800px; /* 进一步增加最大宽度 */
+    max-width: 1400px;
     margin: 20px auto;
     background-color: #f0f2f5;
     border-radius: 12px;
@@ -486,11 +532,15 @@ h1 {
 }
 
 .occupied-legend {
-    background-color: #f86657;
+    background-color: #e74c3c;
 }
 
+/* .exam-occupied-legend {
+  background-color: #3498db;
+} */
+
 .available-legend {
-    background-color: #abefc8;
+    background-color: #27ae60;
 }
 
 .classroom-table {
@@ -580,13 +630,17 @@ h1 {
 }
 
 .available {
-    background-color: #abefc8;
+    background-color: #27ae60;
     cursor: pointer;
 }
 
 .occupied {
-    background-color: #f86657;
+    background-color: #e74c3c;
 }
+
+/* .exam-occupied {
+  background-color: #3498db;
+} */
 
 .bottom-pagination {
     margin-top: 25px;
