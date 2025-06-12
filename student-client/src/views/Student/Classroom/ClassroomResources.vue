@@ -274,7 +274,7 @@ export default {
 
             try {
 
-                const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
+                const response = await axios.get('http://localhost:10086/SC/findAllTerm');
 
                 const semesters = response.data;
 

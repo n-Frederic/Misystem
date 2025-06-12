@@ -12,8 +12,8 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/SCT")
-public class SCTcontroller {
+@RequestMapping("/SC")
+public class SCcontroller {
     @Autowired
     private StudentCourseService studentCourseService;
 
@@ -29,6 +29,10 @@ public class SCTcontroller {
 
     @GetMapping("/findBySid/{sid}/{term}")
     public List<CourseTeacherInfo> findBySid(@PathVariable Integer sid, @PathVariable String term) {
+        return studentCourseService.findBySid(sid, term);
+    }
+    @GetMapping("/findById/{sid}/{term}")
+    public List<CourseTeacherInfo> findByid(@PathVariable Integer sid, @PathVariable String term) {
         return studentCourseService.findBySid(sid, term);
     }
 
