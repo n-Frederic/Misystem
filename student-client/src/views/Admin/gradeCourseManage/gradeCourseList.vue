@@ -125,7 +125,10 @@ export default {
           cno: row.cno,
           tid: row.tid,
           sid: row.sid,
-          term: row.term
+          term: row.term,
+          cname: row.cname,
+          tname: row.tname,
+          sname: row.sname
         }
       })
     }

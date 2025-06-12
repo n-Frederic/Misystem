@@ -65,13 +65,17 @@ export default {
     this.ruleForm.tid = this.$route.query.tid
     this.ruleForm.sid = this.$route.query.sid
     this.ruleForm.term = this.$route.query.term
-    axios.get('http://localhost:10086/SC/findById/' +
-        this.ruleForm.sid + '/' +
-        this.ruleForm.cno + '/' +
-        this.ruleForm.tid + '/' +
-        this.ruleForm.term).then(function (resp) {
-      that.ruleForm = resp.data
-    })
+    this.ruleForm.cname = this.$route.query.cname
+    this.ruleForm.tname = this.$route.query.tname
+    this.ruleForm.sname = this.$route.query.sname
+    axios.get(`http://localhost:10086/SC/findById/${this.ruleForm.sid}/${this.ruleForm.cno}/${this.ruleForm.tid}/${this.ruleForm.term}`)
+        .then(function (resp) {
+          that.ruleForm.grade = resp.data.grade || null; // 只更新 grade
+        })
+        .catch(error => {
+          that.$message.error('获取成绩数据失败，请检查网络或后端服务');
+          that.ruleForm.grade = null;
+        });
   },
   methods: {
     submitForm(formName) {
@@ -81,7 +85,7 @@ export default {
           const that = this
           const sid = that.ruleForm.sid
           const cno = that.ruleForm.cno
-          const tid = that.ruleForm.tid
+          // const tid = that.ruleForm.tid
           const term = that.ruleForm.term
           const grade = that.ruleForm.grade
           axios.get("http://localhost:10086/SC/updateById/" + sid + '/' + cno + '/' + tid + '/' + term + '/' + grade).then(function (resp) {
