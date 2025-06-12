@@ -70,11 +70,33 @@ export default {
   },
   mounted() {
     this.sid = sessionStorage.getItem('sid');
+    this.fetchTerms();
     // 首次加载页面时，设置一个默认学期或从sessionStorage获取上次选中的学期
     this.selectedTerm = sessionStorage.getItem('currentTerm') || this.terms[0].value;
     this.fetchStudentSchedule();
   },
   methods: {
+      fetchTerms() {
+          const that = this;
+          axios.get('http://localhost:10086/SCT/findAllTerm')
+              .then(response => {
+                  that.terms = response.data; // 假设后端返回的数据是一个包含学期对象的数组
+                  // 确保设置默认学期在获取到学期数据之后
+                  if (!sessionStorage.getItem('currentTerm') && that.terms.length > 0) {
+                      that.selectedTerm = that.terms[0].value;
+                  } else {
+                      that.selectedTerm = sessionStorage.getItem('currentTerm');
+                  }
+              })
+              .catch(error => {
+                  console.error('获取学期数据失败:', error);
+                  that.$message({
+                      showClose: true,
+                      message: '获取学期数据失败，请检查网络或后端服务。',
+                      type: 'error'
+                  });
+              });
+      },
     // 获取学生课表数据
     fetchStudentSchedule() {
       if (!this.sid || !this.selectedTerm) {
@@ -96,8 +118,8 @@ export default {
         if (resp.data && resp.data.length > 0) {
           resp.data.forEach(course => {
             // 直接用 day 和 period 构造 key
-            const dayIndex = course.day;
-            const sessionIndex = course.period;
+            const dayIndex = course.day-1;
+            const sessionIndex = course.period-1;
             const key = `${dayIndex}-${sessionIndex}`;
 
             that.$set(that.scheduleData, key, {

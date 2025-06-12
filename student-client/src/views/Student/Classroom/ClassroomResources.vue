@@ -37,9 +37,6 @@
                 <div class="legend-items">
                     <span class="legend-item"><i class="color-box occupancy-course"></i> 排课占用</span>
                     <span class="legend-item"><i class="color-box occupancy-free"></i> 空闲</span>
-                    <span class="legend-item"><i class="color-box occupancy-exam"></i> 考试占用</span>
-                    <span class="legend-item"><i class="color-box occupancy-experiment"></i> 实验占用</span>
-                    <span class="legend-item"><i class="color-box occupancy-other"></i> 其他安排</span>
                 </div>
             </div>
 
@@ -112,11 +109,15 @@ export default {
                 { label: '思源楼', value: 'SY' },
                 { label: '逸夫教学楼', value: 'YF' },
                 { label: '建艺楼', value: 'JY' },
+                { label: '东区', value: 'DQ'}
             ],
             daysOfWeek: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
             sessionsPerDay: 7,
 
             allOccupancyData: [],
+            courseOccupancyData: [], // 仅保留课程数据
+            // examOccupancyData: [], // 删除考试数据
+
             filteredOccupancyData: [],
             paginatedClassroomData: [],
 
@@ -130,7 +131,7 @@ export default {
     async created() {
         await this.fetchCurrentSemester(); // 1. 先获取当前学期
         this.calculateBaseDate(); // 2. 根据学期和周次计算日期
-        this.fetchOccupancyData(); // 3. 再获取教室占用数据
+        // this.fetchOccupancyData(); // 删除冗余方法调用
     },
     methods: {
         async fetchCurrentSemester() {
@@ -138,56 +139,157 @@ export default {
                 const response = await axios.get('http://localhost:10086/SC/findAllTerm');
                 const semesters = response.data;
                 if (semesters && semesters.length > 0) {
-                    this.searchForm.yearSemester = semesters[0]; // 假设后端返回的第一个是当前学期
+                    this.searchForm.yearSemester = semesters[0];
                 } else {
-                    this.searchForm.yearSemester = '25-春季学期'; // 回退到默认值
+                    this.searchForm.yearSemester = '25-春季学期';
                     this.$message.warning('未能从后端获取到学期信息，已使用默认学期。');
                 }
             } catch (error) {
                 console.error('获取学期信息失败:', error);
                 this.$message.error('获取学期信息失败，请检查网络或后端服务');
-                this.searchForm.yearSemester = '25-春季学期'; // API调用失败时的回退
+                this.searchForm.yearSemester = '25-春季学期';
+            }
+
+            this.fetchClassroomBaseInfo(); // 初始化空壳教室
+            await this.fetchCourseOccupancy();   // 只获取课程数据
+            //await this.fetchExamOccupancy();     // 删除考试数据获取
+            this.mergeAndApplyFilters();         // 调用合并和筛选方法 (现在它只处理课程数据)
+        },
+
+        async fetchCourseOccupancy() {
+            try {
+                const params = {
+                    term: this.searchForm.yearSemester,
+                    week: this.searchForm.week,
+                    building: this.searchForm.building, // 确保这些参数被发送到后端
+                    classroom: this.searchForm.classroom
+                };
+                // **替换为你的实际课程表 API 接口**
+                const response = await axios.get('http://localhost:10086/course/findCourse', { params: params });
+                const courseSchedules = response.data; // 假设后端返回的是课程安排数组
+
+                this.courseOccupancyData = this.updateOccupancyData(
+                    JSON.parse(JSON.stringify(this.allOccupancyData)), // 基于模拟生成的基础数据
+                    courseSchedules,
+                    'course'
+                );
+
+                this.mergeAndApplyFilters();
+
+            } catch (error) {
+                console.error('获取课程占用数据失败:', error);
+                this.$message.error('获取课程占用数据失败，请检查网络或后端服务11');
+                this.courseOccupancyData = JSON.parse(JSON.stringify(this.allOccupancyData)); // 失败时重置
+
+                this.mergeAndApplyFilters();
             }
         },
 
-        async fetchOccupancyData() {
-            // 真实后端API调用示例 (请在生产环境使用)
-            // try {
-            //   const response = await axios.get('/api/classroom-occupancy', { params: this.searchForm });
-            //   this.allOccupancyData = response.data;
-            //   this.applyFilters();
-            // } catch (error) {
-            //   console.error('获取教室占用数据失败:', error);
-            //   this.$message.error('获取教室占用数据失败');
-            //   this.allOccupancyData = [];
-            // }
 
-            // 以下是模拟数据，用于演示和调试。请在真实项目中删除或注释掉。
-            const mockData = [];
-            const buildings = { 'SY': '思源楼', 'YF': '逸夫教学楼', 'JY': '建艺楼' };
+        fetchClassroomBaseInfo() {
+            // 模拟数据：生成一些教学楼和教室的空壳
+            const mockClassrooms = [];
+            const buildings = { 'SY': '思源楼', 'YF': '逸夫教学楼', 'JY': '建艺楼', 'DQ': '东区'};
             let roomCounter = 101;
 
+            let roomNumBase = 100; // 新增/修改：初始教室号基数
+
             for (let bCode in buildings) {
-                for (let i = 0; i < 20; i++) { // 每个教学楼生成20个教室
-                    const roomName = `${bCode}${roomCounter++}`;
-                    mockData.push({
+                roomNumBase = 100; // 新增/修改：每个教学楼循环前重置基数
+                for (let i = 0; i < 15; i++) {
+                    const roomNumber = roomNumBase + i + 1; // 新增/修改：从101开始计算教室号
+                    const roomName = `${bCode}${roomNumber}`;
+                    mockClassrooms.push({
                         classroomName: `${roomName} (${Math.floor(Math.random() * 100) + 30})`, // 随机容量
                         schedule: Array(7).fill(null).map(() =>
-                            Array(this.sessionsPerDay).fill(null).map(() => {
-                                const rand = Math.random();
-                                if (rand < 0.3) return { type: 'course', details: `课程 (A${Math.floor(Math.random()*100)})` };
-                                if (rand < 0.4) return { type: 'exam', details: `考试 (E${Math.floor(Math.random()*10)})` };
-                                if (rand < 0.45) return { type: 'experiment', details: `实验 (L${Math.floor(Math.random()*5)})` };
-                                if (rand < 0.48) return { type: 'other', details: `活动 (O${Math.floor(Math.random()*3)})` };
-                                return { type: 'free', details: '' };
-                            })
+                            Array(this.sessionsPerDay).fill({ type: 'free', details: '' })
                         ),
                     });
                 }
             }
 
-            this.allOccupancyData = mockData; // 填充模拟数据
-            this.applyFilters(); // 应用筛选并更新分页数据
+            // for (let bCode in buildings) {
+            //     for (let i = 0; i < 15; i++) { // 每个教学楼生成15个教室
+            //         const roomNumber = roomCounter + i;
+            //         const roomName = `${bCode}${roomNumber}`;
+            //         mockClassrooms.push({
+            //             classroomName: `${roomName} (${Math.floor(Math.random() * 100) + 30})`, // 随机容量
+            //             schedule: Array(7).fill(null).map(() =>
+            //                 Array(this.sessionsPerDay).fill({ type: 'free', details: '' })
+            //             ),
+            //         });
+            //     }
+            //     // roomCounter = 0; // 这行逻辑看起来有点问题，通常每个教学楼的教室号会递增，而不是重置
+            //     // 如果你希望每个教学楼的教室号从 101 开始递增，则不需要此行
+            //     // 如果你希望它们是 SY101, SY102... YF101, YF102... 则每次循环后保持 roomCounter 即可
+            //     // 如果你希望它们是 SY101, SY102... YF201, YF202... 则每次循环结束前 `roomCounter += 100;` 这样的逻辑更合理
+            //     // 暂时注释掉这行，假设 roomCounter 应该在不同教学楼之间持续递增，或者每次从101开始
+            // }
+
+            this.allOccupancyData = JSON.parse(JSON.stringify(mockClassrooms));
+            this.courseOccupancyData = JSON.parse(JSON.stringify(mockClassrooms));
+            // this.examOccupancyData = JSON.parse(JSON.stringify(mockClassrooms)); // 删除考试数据初始化
+        },
+
+        // 删除冗余的 fetchOccupancyData 方法
+        /*
+        async fetchOccupancyData() {
+            // ... (此方法及其内容将被删除)
+        },
+        */
+
+        updateOccupancyData(baseOccupancy, schedules, type) {
+            const updatedOccupancy = JSON.parse(JSON.stringify(baseOccupancy));
+
+            schedules.forEach(item => {
+                const classroomNameFromBackend = item.classroomName || item.name; // 教室名称
+                const dayOfWeek = item.dayOfWeek;
+                const session = item.session;
+                const details = item.details || item.courseName; // 只需要课程名称作为详情
+
+                let classroomEntry = null;
+                // 查找对应的教室，支持包含容量的名称
+                for (let [idx, room] of updatedOccupancy.entries()) {
+                    if (room.classroomName.startsWith(classroomNameFromBackend + ' (') || room.classroomName === classroomNameFromBackend) {
+                        classroomEntry = room;
+                        break;
+                    }
+                }
+
+                if (classroomEntry) {
+                    const dayIndex = dayOfWeek - 1;
+                    const sessionIndex = session - 1;
+
+                    if (dayIndex >= 0 && dayIndex < 7 && sessionIndex >= 0 && sessionIndex < this.sessionsPerDay) {
+                        // 由于现在只有课程数据，直接覆盖即可，无需优先级判断
+                        classroomEntry.schedule[dayIndex][sessionIndex] = { type: type, details: details };
+                    }
+                }
+
+                // (原有 classroomEntry 查找逻辑之后)
+                if (!classroomEntry) {
+                    classroomEntry = updatedOccupancy.find(room => room.classroomName.startsWith(classroomNameFromBackend + ' ('));
+                }
+            });
+            return updatedOccupancy;
+        },
+
+        // 简化 mergeAndApplyFilters 方法
+        mergeAndApplyFilters() {
+            // 不再有考试数据需要合并，直接将 courseOccupancyData 作为最终数据
+            this.allOccupancyData = JSON.parse(JSON.stringify(this.courseOccupancyData));
+
+            // 然后应用筛选
+            this.applyFilters();
+        },
+
+        // 简化 getOccupancyPriority 方法 (不再需要考试、实验、其他)
+        getOccupancyPriority(type) {
+            switch (type) {
+                case 'course': return 4;
+                case 'free': return 1;
+                default: return 0;
+            }
         },
 
         applyFilters() {
@@ -209,7 +311,7 @@ export default {
 
             this.filteredOccupancyData = filtered;
             this.totalClassrooms = filtered.length;
-            this.currentPage = 1; // 筛选条件变化时重置页码
+            this.currentPage = 1;
             this.updatePaginatedData();
         },
 
@@ -220,9 +322,13 @@ export default {
         },
 
         handleSearch() {
-            // 触发筛选，如果需要重新从后端获取数据，则调用 fetchOccupancyData()
-            // 如果只是前端筛选，则调用 applyFilters()
-            this.applyFilters();
+            // 重新获取课程数据，然后触发合并和筛选
+            this.fetchCourseOccupancy();
+            //this.fetchExamOccupancy();
+            // mergeAndApplyFilters 会在 fetchCourseOccupancy 完成后触发
+            // 因为 courseOccupancyData 的更新会触发 watch 中的 building/classroom，进而调用 mergeAndApplyFilters
+            // 或者你可以在这里直接调用：
+            // this.mergeAndApplyFilters(); // 如果你不想依赖 watch，可以直接在这里调用
         },
 
         handlePageChange(newPage) {
@@ -230,18 +336,30 @@ export default {
             this.updatePaginatedData();
         },
 
+        // created 钩子在文件顶部已经修改过，这里不再重复
+        /*
+        async created() {
+            await this.fetchCurrentSemester();
+            this.calculateBaseDate();
+        },
+        */
+
         getCellClass(status) {
             if (!status || status.type === 'free') {
                 return 'occupancy-free';
             } else if (status.type === 'course') {
                 return 'occupancy-course';
-            } else if (status.type === 'exam') {
+            }
+            // 移除其他类型的判断
+            /*
+            else if (status.type === 'exam') {
                 return 'occupancy-exam';
             } else if (status.type === 'experiment') {
                 return 'occupancy-experiment';
             } else if (status.type === 'other') {
                 return 'occupancy-other';
             }
+            */
             return '';
         },
 
@@ -256,28 +374,26 @@ export default {
             }
 
             let semesterStartDate;
-            const yearMatch = this.searchForm.yearSemester.match(/^(\d{2})/); // 匹配开头的两位数字
-            let yearPrefix = new Date().getFullYear(); // 默认当前年份作为备用
+            const yearMatch = this.searchForm.yearSemester.match(/^(\d{2})/);
+            let yearPrefix = new Date().getFullYear();
 
             if (yearMatch && yearMatch[1]) {
                 yearPrefix = parseInt(yearMatch[1], 10);
-                // 假设两位数年份在 70 以下是 20XX 年 (如 25 -> 2025)，否则是 19XX 年 (如 98 -> 1998)
                 yearPrefix = (yearPrefix < 70) ? (2000 + yearPrefix) : (1900 + yearPrefix);
             }
-            const fullYear = yearPrefix; // 最终的完整年份
+            const fullYear = yearPrefix;
 
             if (this.searchForm.yearSemester.includes('春季学期')) {
-                semesterStartDate = new Date(fullYear, 1, 24); // 2月24日 (月份是0-indexed，1代表2月)
+                semesterStartDate = new Date(fullYear, 1, 24);
             } else if (this.searchForm.yearSemester.includes('秋季学期')) {
-                semesterStartDate = new Date(fullYear, 8, 1); // 9月1日 (月份是0-indexed，8代表9月)
+                semesterStartDate = new Date(fullYear, 8, 1);
             } else {
                 console.warn('无法识别的学期格式，使用默认起始日期。');
-                semesterStartDate = new Date(fullYear, 0, 1); // 默认年初
+                semesterStartDate = new Date(fullYear, 0, 1);
             }
 
-            // 调整为星期一：如果 semesterStartDate 不是星期一，向前调整到最近的星期一
-            const dayOfWeek = semesterStartDate.getDay(); // 0为星期天，1为星期一 ... 6为星期六
-            const daysToMonday = dayOfWeek === 0 ? -6 : -(dayOfWeek - 1); // 如果是星期天，向前调整6天回到上周一；否则，向前调整 (当前星期几 - 1) 天
+            const dayOfWeek = semesterStartDate.getDay();
+            const daysToMonday = dayOfWeek === 0 ? -6 : -(dayOfWeek - 1);
             semesterStartDate.setDate(semesterStartDate.getDate() + daysToMonday);
 
             const daysToAdd = (this.searchForm.week - 1) * 7;
@@ -290,24 +406,41 @@ export default {
             if (!this.currentBaseDate) return '';
             const date = new Date(this.currentBaseDate);
             date.setDate(date.getDate() + dayIndex);
-            // 核心修复：确保这里只返回纯文本日期，不包含任何HTML标签
             return `${date.getMonth() + 1}/${date.getDate()}`;
         }
     },
     watch: {
-        'searchForm.week': 'calculateBaseDate', // 周次变化时重新计算日期
-        'searchForm.yearSemester': function(newVal, oldVal) {
-            if (newVal !== oldVal && newVal) {
-                this.calculateBaseDate(); // 学期变化时重新计算日期
-            }
+        'searchForm.week': {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.calculateBaseDate();
+                    this.fetchCourseOccupancy(); // 只获取课程
+                    //this.fetchExamOccupancy(); // 删除对考试的调用
+                    this.mergeAndApplyFilters();
+                }
+            },
+            deep: true
         },
-        'searchForm.building': 'applyFilters', // 教学楼变化时应用筛选
-        'searchForm.classroom': 'applyFilters', // 教室号变化时应用筛选
+        'searchForm.yearSemester': {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal && newVal) {
+                    this.calculateBaseDate();
+                    this.fetchClassroomBaseInfo(); // 重新生成模拟的基础教室
+                    this.fetchCourseOccupancy(); // 重新获取课程
+                    //this.fetchExamOccupancy(); // 删除对考试的调用
+                    this.mergeAndApplyFilters();
+                }
+            },
+            deep: true
+        },
+        'searchForm.building': 'handleSearch', // 教学楼变化时执行 handleSearch
+        'searchForm.classroom': 'handleSearch', // 教室号变化时执行 handleSearch
     }
 };
 </script>
 
 <style scoped>
+/* 样式部分保持不变，但可以考虑删除 .occupancy-exam, .occupancy-experiment, .occupancy-other 的 CSS 规则，因为不再使用这些颜色 */
 .classroom-occupancy {
     padding: 20px;
     background-color: #f5f7fa;
@@ -399,9 +532,10 @@ export default {
 
 .occupancy-course { background-color: #F56C6C; }
 .occupancy-free { background-color: #EBEEF5; }
-.occupancy-exam { background-color: #E6A23C; }
-.occupancy-experiment { background-color: #409EFF; }
-.occupancy-other { background-color: #909399; }
+/* 删除这些不再使用的样式 */
+/* .occupancy-exam { background-color: #E6A23C; } */
+/* .occupancy-experiment { background-color: #409EFF; } */
+/* .occupancy-other { background-color: #909399; } */
 
 
 .occupancy-grid {
