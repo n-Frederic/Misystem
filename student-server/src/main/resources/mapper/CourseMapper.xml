@@ -30,7 +30,7 @@
     </select>
 
     <select id="getAllCourses" resultType="classroomUseInfo">
-        SELECT location, day, period
+        SELECT c.location, c.day, c.period
         from studentms.c
     </select>
 
