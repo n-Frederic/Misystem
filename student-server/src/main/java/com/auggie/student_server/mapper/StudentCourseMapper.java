@@ -54,7 +54,7 @@ public interface StudentCourseMapper {
                                       @Param("term") String term);
 
 
-    @Update("UPDATE studentms.sc SET sc.grade = #{grade} WHERE sc.sid = #{sid} AND sc.cno = #{cno} AND sc.term = #{term}")
+    @Update("UPDATE studentms.sc SET sc.daily_grade = #{grade} WHERE sc.sid = #{sid} AND sc.cno = #{cno} AND sc.term = #{term}")
     public boolean updateById(@Param("sid") Integer sid,
                               @Param("cid") Integer cid,
                               @Param("term") String term,

@@ -1,6 +1,7 @@
 package com.auggie.student_server.mapper;
 
 import com.auggie.student_server.entity.Course;
+import com.auggie.student_server.entity.classroomUseInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -25,5 +26,5 @@ public interface CourseMapper {
 //    delete
     public boolean deleteById(@Param("cid") Integer cid);
 
-    public boolean getAllCourses();
+    public List<classroomUseInfo> getAllCourses();
 }

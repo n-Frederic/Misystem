@@ -31,10 +31,7 @@ public class SCcontroller {
     public List<CourseTeacherInfo> findBySid(@PathVariable Integer sid, @PathVariable String term) {
         return studentCourseService.findBySid(sid, term);
     }
-    @GetMapping("/findById/{sid}/{term}")
-    public List<CourseTeacherInfo> findByid(@PathVariable Integer sid, @PathVariable String term) {
-        return studentCourseService.findBySid(sid, term);
-    }
+
 
     @GetMapping("/findAllTerm")
     public List<String> findAllTerm() {
