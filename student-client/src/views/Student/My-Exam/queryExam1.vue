@@ -20,12 +20,6 @@
                 <el-button type="primary" @click="handleSearch">查询</el-button>
             </div>
 
-            <div style="margin-bottom: 15px; padding: 10px; border: 1px dashed #ccc; background-color: #f9f9f9; font-size: 14px;">
-                <p>当前请求 SID: <span style="font-weight: bold; color: blue;">{{ debugSid || '未获取' }}</span></p>
-                <p>当前请求 Term: <span style="font-weight: bold; color: blue;">{{ debugTerm || '未获取' }}</span></p>
-                <p style="color: gray;">(这些值将在发送考试安排请求时使用)</p>
-            </div>
-
             <el-table :data="filteredExams" style="width: 100%" border>
                 <el-table-column
                     prop="cno"
@@ -157,14 +151,10 @@ export default {
                 // 如果当前没有选择学期，则默认选中第一个学期（转换后的 value）
                 if (!this.searchForm.yearSemester && this.semesterOptions.length > 0) {
                     this.searchForm.yearSemester = this.semesterOptions[0].value;
-                    // **重要：首次加载时，也将正确的学期格式存入 sessionStorage**
-                    sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
                 }
             } catch (error) {
                 console.error('获取学期信息失败:', error);
                 this.$message.error('获取学期信息失败，请检查网络或后端服务');
-                // 如果API调用失败，提供一个硬编码的默认学期作为回退，注意格式
-                this.semesterOptions = [{ label: '2024-2025学年第二学期', value: '2024-2025-2' }];
                 if (!this.searchForm.yearSemester) {
                     this.searchForm.yearSemester = '2024-2025-2';
                     sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
@@ -184,9 +174,7 @@ export default {
             }
             try {
                 const sid = sessionStorage.getItem('sid');
-                // **term 从 sessionStorage 获取，现在应该已经是 YYYY-S 格式了**
-                //const term = sessionStorage.getItem('currentTerm');
-                const term="25-春季学期";
+                const term = this.searchForm.yearSemester;
 
                 // **显示在页面上的调试信息**
                 this.debugSid = sid;
@@ -228,9 +216,6 @@ export default {
          * 处理查询按钮点击事件或学期变化
          */
         handleSearch() {
-            // **重要：当学期选择变化或点击查询时，将当前选中的正确格式的学期保存到 sessionStorage**
-            sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
-            // 重新从后端获取数据
             this.fetchExamData();
         },
 
@@ -248,10 +233,6 @@ export default {
                 return matchesExamName && matchesCourseName;
             });
         },
-        // handleOperation(row) {
-        //   console.log('操作行:', row);
-        //   // 根据实际需求处理操作，例如跳转到详情页
-        // },
     },
 };
 </script>

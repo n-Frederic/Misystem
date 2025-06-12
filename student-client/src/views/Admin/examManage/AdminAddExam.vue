@@ -98,7 +98,7 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log('Submitting exam:', JSON.stringify(this.ruleForm)); // 调试日志
+
           axios.post('http://localhost:10086/exams/add', this.ruleForm).then(resp => {
             console.log('Response:', resp.data); // 调试日志
             if (resp.data.success) {

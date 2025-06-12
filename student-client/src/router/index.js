@@ -24,8 +24,6 @@ import teacherHome from "@/views/Teacher/home";
 import setCourse from "@/views/Teacher/setCourse";
 import studentHome from "@/views/Student/home";
 import myOfferCourse from "@/views/Teacher/myOfferCourse";
-import CourseTeacherManage from "@/views/Admin/selectCourseManage/index";
-import queryCourseTeacher from "@/views/Admin/selectCourseManage/queryCourseTeacher";
 import studentSelectCourseManage from "@/views/Student/selectCourse/index";
 import selectCourse from "@/views/Student/selectCourse/selectCourse";
 import querySelectedCourse from "@/views/Student/selectCourse/querySelectedCourse";
@@ -39,7 +37,6 @@ import queryGradeCourse from "@/views/Admin/gradeCourseManage/queryGradeCourse";
 import editorGradeCourse from "@/views/Admin/gradeCourseManage/editorGradeCourse";
 import teacherGradeCourseManage from "@/views/Teacher/teacherGradeCourseManage/index";
 import teacherQueryGradeCourse from "@/views/Teacher/teacherGradeCourseManage/teacherQueryGradeCourse";
-import teacherGradeCourseList from "@/views/Teacher/teacherGradeCourseManage/teacherGradeCourseList";
 import teacherEditorGradeCourse from "@/views/Teacher/teacherGradeCourseManage/teacherEditorGradeCourse";
 import updateInfo from "@/components/updateInfo";
 import examManage from "@/views/Admin/examManage/index";
@@ -189,21 +186,7 @@ const routes = [
         ]
       },
       {
-        path: '/CourseTeacher',
-        name: '开课表管理',
-        component: CourseTeacherManage,
-        meta: {requireAuth: true},
-        children: [
-          {
-            path: '/queryCourseTeacher',
-            name: '开课管理',
-            component: queryCourseTeacher,
-            meta: {requireAuth: true},
-          }
-        ]
-      },
-      {
-        name: 'admin 学生成绩管理',
+        name: '学生成绩管理',
         path: "/gradeCourseManage",
         component: studentManage,
         meta: {requireAuth: true},
