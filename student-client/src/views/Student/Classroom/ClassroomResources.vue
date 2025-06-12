@@ -1,1293 +1,637 @@
 <template>
+    <div id="classroom-availability">
+        <div class="header-section">
+            <h1>教室占用情况查询</h1>
+            <div class="search-controls">
+                <label for="semester-select">当前学期: </label>
+                <select id="semester-select" v-model="selectedSemester" @change="fetchClassroomStatus">
+                    <option v-for="semesterItem in semesters" :key="semesterItem" :value="semesterItem">
+                        {{ semesterItem }}
+                    </option>
+                </select>
 
-    <div class="classroom-occupancy">
+                <label for="week-select">第</label>
+                <select id="week-select" v-model="currentWeekIndex" @change="fetchClassroomStatus">
+                    <option v-for="(weekNum, index) in totalWeeks" :key="index" :value="index">
+                        {{ index + 1 }}
+                    </option>
+                </select>
+                <span>周</span>
 
-        <el-card>
+                <label for="building-select">选择教学楼:</label>
+                <select id="building-select" v-model="selectedBuildingPrefix" @change="handleBuildingChange">
+                    <option value="">-全部教学楼-</option> <option v-for="(name, prefix) in buildingMap" :key="prefix" :value="prefix">
+                    {{ name }}
+                </option>
+                </select>
 
-            <div slot="header" class="clearfix">
+                <input type="text" placeholder="教室号" v-model="searchLocation" class="search-input">
+                <button @click="fetchClassroomStatus" class="search-button">查询</button>
+            </div>
+        </div>
 
-                <span>教室占用情况查询</span>
+        <div v-if="loading" class="loading-message">
+            加载中，请稍候...
+        </div>
 
+        <div v-else-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+        </div>
+
+        <div v-else>
+            <div class="legend">
+                <span>图例:</span>
+                <span class="legend-item occupied-legend"></span><span>已占用</span>
+                <span class="legend-item available-legend"></span><span>空闲</span>
             </div>
 
-
-
-            <div class="search-panel">
-
-        <span class="current-semester-display">
-
-          当前学期: {{ searchForm.yearSemester || '加载中...' }}
-
-        </span>
-
-
-
-                <el-select v-model="searchForm.week" placeholder="选择周次" @change="handleSearch" size="small">
-
-                    <el-option
-
-                        v-for="n in 20" :key="n"
-
-                        :label="`第${n}周`"
-
-                        :value="n">
-
-                    </el-option>
-
-                </el-select>
-
-
-
-                <el-select v-model="searchForm.building" placeholder="选择教学楼" @change="handleSearch" size="small">
-
-                    <el-option
-
-                        v-for="item in buildingOptions"
-
-                        :key="item.value"
-
-                        :label="item.label"
-
-                        :value="item.value">
-
-                    </el-option>
-
-                </el-select>
-
-
-
-                <el-input v-model="searchForm.classroom" placeholder="教室号" clearable @keyup.enter.native="handleSearch" size="small"></el-input>
-
-
-
-                <el-button type="primary" @click="handleSearch" size="small">查询</el-button>
-
-            </div>
-
-
-
-            <div class="legend-panel">
-
-                <div class="legend-title">图例:</div>
-
-                <div class="legend-items">
-
-                    <span class="legend-item"><i class="color-box occupancy-course"></i> 排课占用</span>
-
-                    <span class="legend-item"><i class="color-box occupancy-free"></i> 空闲</span>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="occupancy-grid">
-
-                <div class="grid-header">
-
-                    <div class="grid-cell time-header"></div>
-
-                    <div class="grid-cell day-header" v-for="(dayName, dayIndex) in daysOfWeek" :key="dayIndex">
-
-                        {{ dayName }} <br/>
-
-                        <span class="date-hint">{{ getFormattedDate(dayIndex) }}</span>
-
-                        <div class="session-numbers">
-
-                            <span v-for="n in sessionsPerDay" :key="n">{{ n }}</span>
-
+            <table class="classroom-table">
+                <thead>
+                <tr>
+                    <th class="location-col">教室号</th>
+                    <th v-for="(day, dayIndex) in daysOfWeek" :key="day">
+                        <div class="day-header">
+                            <span>{{ day }}</span>
+                            <span class="date-header">{{ getFormattedDate(dayIndex) }}</span>
                         </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="grid-row" v-for="(classroomOccupancy, classroomIndex) in paginatedClassroomData" :key="classroomIndex">
-
-                    <div class="grid-cell classroom-label">
-
-                        {{ classroomOccupancy.classroomName }}
-
-                    </div>
-
-                    <div
-
-                        class="grid-cell occupancy-day-cell"
-
-                        v-for="(occupancyStatusOfDay, dayIndex) in classroomOccupancy.schedule"
-
-                        :key="dayIndex"
-
-                    >
-
-                        <div
-
-                            :class="getCellClass(occupancyStatusOfDay[sessionIndex])"
-
-                            v-for="(sessionStatus, sessionIndex) in occupancyStatusOfDay"
-
-                            :key="sessionIndex"
-
-                            :title="getOccupancyDetails(sessionStatus)"
-
-                        >
-
+                        <div class="periods-row-header">
+                            <span v-for="period in 7" :key="period">{{ period }}</span>
                         </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="location in pagedLocations" :key="location">
+                    <td class="location-col">{{ location }}</td>
+                    <td v-for="(day, dayIndex) in daysOfWeek" :key="day">
+                        <div class="periods-row">
+                            <div v-for="period in 7" :key="period"
+                                 :class="getClassroomStatus(location, dayIndex + 1, period)">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
-                    </div>
-
+            <div class="bottom-pagination">
+                <el-pagination
+                    background
+                    layout="prev, pager, next"
+                    :total="totalPagedLocationsCount"
+                    :page-size="pageSize"
+                    :current-page="currentFloorPage"
+                    @current-change="handleFloorPageChange"
+                    :hide-on-single-page="true">
+                </el-pagination>
+                <div class="page-jumper">
+                    <span>前往</span>
+                    <input type="number" v-model.number="jumperPage" class="jumper-input"
+                           :min="1" :max="Math.ceil(totalPagedLocationsCount / pageSize)">
+                    <button @click="jumpToPage" class="jumper-button">Go</button>
+                    <span>页</span>
+                    <span class="total-pages">共 {{ Math.ceil(totalPagedLocationsCount / pageSize) }} 页</span>
                 </div>
-
-                <div v-if="!paginatedClassroomData || paginatedClassroomData.length === 0" class="no-data-message">
-
-                    <div style="grid-column: 1 / span 8; text-align: center; padding: 20px;">
-
-                        暂无教室占用数据
-
-                    </div>
-
-                </div>
-
             </div>
-
-
-
-            <el-pagination
-
-                background
-
-                layout="prev, pager, next, total"
-
-                :total="totalClassrooms"
-
-                :page-size="pageSize"
-
-                :current-page.sync="currentPage"
-
-                @current-change="handlePageChange"
-
-                class="pagination-bottom"
-
-            >
-
-            </el-pagination>
-
-        </el-card>
-
+        </div>
     </div>
-
 </template>
 
-
-
 <script>
-
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
-
-
+// 如果你使用了 Element Plus 的分页组件，请确保已安装并在此处导入
+// import { ElPagination, ElMessage } from 'element-plus';
 
 export default {
+    // 如果使用 Element Plus 分页，需要注册组件
+    // components: {
+    //   ElPagination,
+    // },
+    setup() {
+        // --- 数据 ---
+        const semesters = ref([]);
+        const selectedSemester = ref(null);
+        const classroomData = ref([]);
+        const loading = ref(false);
+        const errorMessage = ref('');
+        const searchLocation = ref('');
 
-    name: 'ClassroomOccupancyQuery',
+        // --- 教学楼类型控制 ---
+        const buildingMap = ref({
+            'YF': '逸夫教学楼',
+            'SY': '思源教学楼',
+            'JY': '建艺教学楼',
+            'DQ': '东区教学楼'
+            // 可以在这里添加更多教学楼
+        });
+        const selectedBuildingPrefix = ref(''); // 默认值为 ''，对应 "-全部教学楼-"
 
-    data() {
+        // --- 周数控制 ---
+        const currentWeekIndex = ref(0); // 当前周的索引 (0-based)
+        const weeksInSemester = ref(18); // 假设一个学期有18周
 
-        return {
+        // --- 日期计算基准 ---
+        // 2025年2月24日是星期一
+        const FIRST_WEEK_MONDAY_2025 = new Date('2025-02-24T00:00:00');
 
-            searchForm: {
+        // --- 教学楼分页 ---
+        const totalFloors = ref(6); // 假设每种教学楼总共有6层 (1xx - 6xx)
+        const classroomsPerFloor = 10; // 每层教室数量 (例如 YF101 - YF110)
+        const currentFloorPage = ref(1); // 当前教学楼分页的页码 (1-based)
+        const pageSize = ref(classroomsPerFloor); // 每页显示10个教室 (即1层)
+        const jumperPage = ref(1); // 跳转页码输入框的值
 
-                yearSemester: '', // 用于存储当前学期
+        // 生成所有教学楼教室的完整列表 (或当前选中教学楼的列表)
+        const allClassrooms = computed(() => {
+            const rooms = [];
+            const prefixesToGenerate = selectedBuildingPrefix.value === ''
+                ? Object.keys(buildingMap.value) // 如果是全部，则遍历所有前缀
+                : [selectedBuildingPrefix.value]; // 否则只使用当前选中的前缀
 
-                week: 16, // 默认周次设置为第16周，方便调试看到数据，与目标图 image_d4e27a.png 保持一致
+            prefixesToGenerate.forEach(prefix => {
+                for (let floor = 1; floor <= totalFloors.value; floor++) {
+                    for (let room = 1; room <= classroomsPerFloor; room++) {
+                        let roomNumber = room.toString();
+                        if (room < 10) {
+                            roomNumber = `0${room}`;
+                        }
+                        rooms.push(`${prefix}${floor}${roomNumber}`);
+                    }
+                }
+            });
+            return rooms.sort(); // 确保教室号排序
+        });
 
-                building: '', // 默认空字符串，对应“全部教学楼”
+        // 根据当前页码和搜索条件过滤并获取当前楼层的教室列表
+        const pagedLocations = computed(() => {
+            let filteredBySearch = allClassrooms.value; // 从所有（或特定教学楼）教室中过滤
 
-                classroom: ''
+            if (searchLocation.value) {
+                filteredBySearch = filteredBySearch.filter(location =>
+                    location.toUpperCase().includes(searchLocation.value.toUpperCase())
+                );
+            }
 
-            },
+            // 如果搜索结果为空，显示一个空数组
+            if (filteredBySearch.length === 0) {
+                return [];
+            }
 
-            buildingOptions: [
+            const startIndex = (currentFloorPage.value - 1) * pageSize.value;
+            const endIndex = startIndex + pageSize.value;
 
-                { label: '全部教学楼', value: '' },
+            return filteredBySearch.slice(startIndex, endIndex);
+        });
 
-                { label: '思源楼', value: 'SY' },
-
-                { label: '逸夫教学楼', value: 'YF' },
-
-                { label: '建艺楼', value: 'JY' },
-
-                { label: '东区', value: 'DQ'}
-
-            ],
-
-            daysOfWeek: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
-
-            sessionsPerDay: 7,
-
-
-
-            allOccupancyData: [],
-
-            courseOccupancyData: [], // 仅保留课程数据
-
-            // examOccupancyData: [], // 删除考试数据
-
-
-
-            filteredOccupancyData: [],
-
-            paginatedClassroomData: [],
-
-
-
-            pageSize: 10,
-
-            currentPage: 1,
-
-            totalClassrooms: 0,
+        // 计算当前经过教学楼选择和搜索过滤后的总教室数（用于分页器的total属性）
+        const totalPagedLocationsCount = computed(() => {
+            let filteredBySearch = allClassrooms.value; // 从所有（或特定教学楼）教室中过滤
+            if (searchLocation.value) {
+                filteredBySearch = filteredBySearch.filter(location =>
+                    location.toUpperCase().includes(searchLocation.value.toUpperCase())
+                );
+            }
+            return filteredBySearch.length;
+        });
 
 
+        const daysOfWeek = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
 
-            currentBaseDate: null, // 当前周的星期一的日期对象
+        const totalWeeks = computed(() => {
+            return weeksInSemester.value;
+        });
 
+        const getFormattedDate = (dayIndex) => {
+            const date = new Date(FIRST_WEEK_MONDAY_2025);
+            date.setDate(date.getDate() + (currentWeekIndex.value * 7));
+            date.setDate(date.getDate() + dayIndex);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
         };
 
-    },
-
-    async created() {
-
-        await this.fetchCurrentSemester(); // 1. 先获取当前学期
-
-        this.calculateBaseDate(); // 2. 根据学期和周次计算日期
-
-        // this.fetchOccupancyData(); // 删除冗余方法调用
-
-    },
-
-    methods: {
-
-        async fetchCurrentSemester() {
-
+        const fetchSemesters = async () => {
+            loading.value = true;
+            errorMessage.value = '';
             try {
-
                 const response = await axios.get('http://localhost:10086/SC/findAllTerm');
+                semesters.value = response.data;
 
-                const semesters = response.data;
-
-                if (semesters && semesters.length > 0) {
-
-                    this.searchForm.yearSemester = semesters[0];
-
+                if (semesters.value && semesters.value.length > 0) {
+                    selectedSemester.value = semesters.value[0];
+                    fetchClassroomStatus();
                 } else {
-
-                    this.searchForm.yearSemester = '25-春季学期';
-
-                    this.$message.warning('未能从后端获取到学期信息，已使用默认学期。');
-
+                    selectedSemester.value = '25-春季学期';
+                    console.warn('未能从后端获取到学期信息，已使用默认学期。');
                 }
-
             } catch (error) {
-
                 console.error('获取学期信息失败:', error);
-
-                this.$message.error('获取学期信息失败，请检查网络或后端服务');
-
-                this.searchForm.yearSemester = '25-春季学期';
-
+                errorMessage.value = '获取学期信息失败，请检查网络或后端服务';
+                selectedSemester.value = '25-春季学期';
+            } finally {
+                loading.value = false;
             }
+        };
 
+        const fetchClassroomStatus = async () => {
+            if (!selectedSemester.value) return;
 
-
-            this.fetchClassroomBaseInfo(); // 初始化空壳教室
-
-            await this.fetchCourseOccupancy();   // 只获取课程数据
-
-            //await this.fetchExamOccupancy();     // 删除考试数据获取
-
-            this.mergeAndApplyFilters();         // 调用合并和筛选方法 (现在它只处理课程数据)
-
-        },
-
-
-
-        async fetchCourseOccupancy() {
+            loading.value = true;
+            errorMessage.value = '';
+            classroomData.value = [];
 
             try {
-
                 const params = {
-                    term: this.searchForm.yearSemester,
-                    week: this.searchForm.week,
-                    building: this.searchForm.building,
-                    classroom: this.searchForm.classroom
+                    yearSemester: selectedSemester.value,
+                    week: currentWeekIndex.value + 1,
                 };
 
+                // 关键点：如果选择了“全部教学楼”，则不传递 buildingPrefix，让后端返回所有数据
+                // 如果后端支持，也可以传递一个 buildingPrefixes 数组
+                if (selectedBuildingPrefix.value !== '') {
+                    params.buildingPrefix = selectedBuildingPrefix.value;
+                    // 传递楼层参数 (如果后端按楼层分页)
+                    params.floor = currentFloorPage.value;
+                } else {
+                    // 如果是“全部”，并且后端需要特定参数才能返回所有，这里可能需要调整
+                    // 例如：params.getAllBuildings = true;
+                    // 或者：params.buildingPrefixes = Object.keys(buildingMap.value).join(',');
+                }
 
+                // 如果后端支持按教室号模糊查询，可以把 searchLocation 传过去
+                if (searchLocation.value) {
+                    params.keywordLocation = searchLocation.value;
+                }
+
+                // 重要的性能考量：
+                // 如果后端不支持按 buildingPrefix/floor/keywordLocation 过滤，
+                // 那么此接口会返回所有教室的占用数据。
+                // 这将导致 classroomData.value 包含大量数据，前端内存和渲染压力增大。
+                // 理想情况是后端返回已经过滤和分页好的数据。
                 const response = await axios.get('http://localhost:10086/course/getAllCourses', { params: params });
-                const courseSchedules = response.data; // 假设后端返回的是课程安排数组
 
-                this.courseOccupancyData = this.updateOccupancyData(
-
-                    JSON.parse(JSON.stringify(this.allOccupancyData)), // 基于模拟生成的基础数据
-
-                    courseSchedules,
-                    'course'
-                );
-
-                this.mergeAndApplyFilters();
+                classroomData.value = response.data;
 
             } catch (error) {
-
-                console.error('获取课程占用数据失败:', error);
-                this.$message.error('获取课程占用数据失败，请检查网络或后端服务11');
-
-                this.courseOccupancyData = JSON.parse(JSON.stringify(this.allOccupancyData)); // 失败时重置
-
-
-
-                this.mergeAndApplyFilters();
-
+                console.error('获取教室占用情况出错:', error);
+                errorMessage.value = '无法获取教室占用情况，请稍后再试。';
+            } finally {
+                loading.value = false;
             }
-
-        },
-
-
-
-
-
-        fetchClassroomBaseInfo() {
-
-            // 模拟数据：生成一些教学楼和教室的空壳
-
-            const mockClassrooms = [];
-
-            const buildings = { 'SY': '思源楼', 'YF': '逸夫教学楼', 'JY': '建艺楼', 'DQ': '东区'};
-
-            let roomCounter = 101;
-
-
-
-            let roomNumBase = 100; // 新增/修改：初始教室号基数
-
-
-
-            for (let bCode in buildings) {
-
-                roomNumBase = 100; // 新增/修改：每个教学楼循环前重置基数
-
-                for (let i = 0; i < 15; i++) {
-
-                    const roomNumber = roomNumBase + i + 1; // 新增/修改：从101开始计算教室号
-
-                    const roomName = `${bCode}${roomNumber}`;
-
-                    mockClassrooms.push({
-
-                        classroomName: `${roomName} (${Math.floor(Math.random() * 100) + 30})`, // 随机容量
-
-                        schedule: Array(7).fill(null).map(() =>
-
-                            Array(this.sessionsPerDay).fill({ type: 'free', details: '' })
-
-                        ),
-
-                    });
-
-                }
-
-            }
-
-
-
-            // for (let bCode in buildings) {
-
-            //     for (let i = 0; i < 15; i++) { // 每个教学楼生成15个教室
-
-            //         const roomNumber = roomCounter + i;
-
-            //         const roomName = `${bCode}${roomNumber}`;
-
-            //         mockClassrooms.push({
-
-            //             classroomName: `${roomName} (${Math.floor(Math.random() * 100) + 30})`, // 随机容量
-
-            //             schedule: Array(7).fill(null).map(() =>
-
-            //                 Array(this.sessionsPerDay).fill({ type: 'free', details: '' })
-
-            //             ),
-
-            //         });
-
-            //     }
-
-            //     // roomCounter = 0; // 这行逻辑看起来有点问题，通常每个教学楼的教室号会递增，而不是重置
-
-            //     // 如果你希望每个教学楼的教室号从 101 开始递增，则不需要此行
-
-            //     // 如果你希望它们是 SY101, SY102... YF101, YF102... 则每次循环后保持 roomCounter 即可
-
-            //     // 如果你希望它们是 SY101, SY102... YF201, YF202... 则每次循环结束前 `roomCounter += 100;` 这样的逻辑更合理
-
-            //     // 暂时注释掉这行，假设 roomCounter 应该在不同教学楼之间持续递增，或者每次从101开始
-
-            // }
-
-
-
-            this.allOccupancyData = JSON.parse(JSON.stringify(mockClassrooms));
-
-            this.courseOccupancyData = JSON.parse(JSON.stringify(mockClassrooms));
-
-            // this.examOccupancyData = JSON.parse(JSON.stringify(mockClassrooms)); // 删除考试数据初始化
-
-        },
-
-
-
-        // 删除冗余的 fetchOccupancyData 方法
-
-        /*
-
-        async fetchOccupancyData() {
-
-            // ... (此方法及其内容将被删除)
-
-        },
-
-        */
-
-
-
-        updateOccupancyData(baseOccupancy, schedules, type) {
-
-            const updatedOccupancy = JSON.parse(JSON.stringify(baseOccupancy));
-
-
-
-            schedules.forEach(item => {
-
-                const classroomNameFromBackend = item.location || item.name; // 教室名称
-
-                const dayOfWeek = item.day;
-
-                const session = item.period;
-
-               // const details = item.details || item.courseName; // 只需要课程名称作为详情
-
-
-
-                let classroomEntry = null;
-
-                // 查找对应的教室，支持包含容量的名称
-
-                for (let [idx, room] of updatedOccupancy.entries()) {
-
-                    if (room.classroomName.startsWith(classroomNameFromBackend + ' (') || room.classroomName === classroomNameFromBackend) {
-
-                        classroomEntry = room;
-
-                        break;
-                    }
-                }
-
-                if (classroomEntry) {
-
-                    const dayIndex = dayOfWeek - 1;
-
-                    const sessionIndex = session - 1;
-
-
-
-                    if (dayIndex >= 0 && dayIndex < 7 && sessionIndex >= 0 && sessionIndex < this.sessionsPerDay) {
-
-                        // 由于现在只有课程数据，直接覆盖即可，无需优先级判断
-
-                        classroomEntry.schedule[dayIndex][sessionIndex] = { type: type, details: details };
-
-                    }
-
-                }
-
-
-
-                // (原有 classroomEntry 查找逻辑之后)
-
-                if (!classroomEntry) {
-
-                    classroomEntry = updatedOccupancy.find(room => room.classroomName.startsWith(classroomNameFromBackend + ' ('));
-
-                }
-
+        };
+
+        const getClassroomStatus = (location, dayNumber, period) => {
+            const isOccupied = classroomData.value.some(item => {
+                return String(item.location) === location &&
+                    item.day === dayNumber &&
+                    item.period === period;
             });
-
-            return updatedOccupancy;
-
-        },
-
-
-
-        // 简化 mergeAndApplyFilters 方法
-
-        mergeAndApplyFilters() {
-
-            // 不再有考试数据需要合并，直接将 courseOccupancyData 作为最终数据
-
-            this.allOccupancyData = JSON.parse(JSON.stringify(this.courseOccupancyData));
-
-
-
-            // 然后应用筛选
-
-            this.applyFilters();
-
-        },
-
-
-
-        // 简化 getOccupancyPriority 方法 (不再需要考试、实验、其他)
-
-        getOccupancyPriority(type) {
-
-            switch (type) {
-
-                case 'course': return 4;
-
-                case 'free': return 1;
-
-                default: return 0;
-
-            }
-
-        },
-
-
-
-        applyFilters() {
-
-            let filtered = this.allOccupancyData;
-
-
-
-            if (this.searchForm.building) {
-
-                const buildingPrefix = this.searchForm.building;
-
-                filtered = filtered.filter(classroom =>
-
-                    classroom.classroomName.startsWith(buildingPrefix)
-
-                );
-
-            }
-
-
-
-            if (this.searchForm.classroom) {
-
-                const classroomName = this.searchForm.classroom.toUpperCase();
-
-                filtered = filtered.filter(classroom =>
-
-                    classroom.classroomName.includes(classroomName)
-
-                );
-
-            }
-
-
-
-            this.filteredOccupancyData = filtered;
-
-            this.totalClassrooms = filtered.length;
-
-            this.currentPage = 1;
-
-            this.updatePaginatedData();
-
-        },
-
-
-
-        updatePaginatedData() {
-
-            const start = (this.currentPage - 1) * this.pageSize;
-
-            const end = start + this.pageSize;
-
-            this.paginatedClassroomData = this.filteredOccupancyData.slice(start, end);
-
-        },
-
-
-
-        handleSearch() {
-
-            // 重新获取课程数据，然后触发合并和筛选
-
-            this.fetchCourseOccupancy();
-
-            //this.fetchExamOccupancy();
-
-            // mergeAndApplyFilters 会在 fetchCourseOccupancy 完成后触发
-
-            // 因为 courseOccupancyData 的更新会触发 watch 中的 building/classroom，进而调用 mergeAndApplyFilters
-
-            // 或者你可以在这里直接调用：
-
-            // this.mergeAndApplyFilters(); // 如果你不想依赖 watch，可以直接在这里调用
-
-        },
-
-
-
-        handlePageChange(newPage) {
-
-            this.currentPage = newPage;
-
-            this.updatePaginatedData();
-
-        },
-
-
-
-        // created 钩子在文件顶部已经修改过，这里不再重复
-
-        /*
-
-        async created() {
-
-            await this.fetchCurrentSemester();
-
-            this.calculateBaseDate();
-
-        },
-
-        */
-
-
-
-        getCellClass(status) {
-
-            if (!status || status.type === 'free') {
-
-                return 'occupancy-free';
-
-            } else if (status.type === 'course') {
-
-                return 'occupancy-course';
-
-            }
-
-            // 移除其他类型的判断
-
-            /*
-
-            else if (status.type === 'exam') {
-
-                return 'occupancy-exam';
-
-            } else if (status.type === 'experiment') {
-
-                return 'occupancy-experiment';
-
-            } else if (status.type === 'other') {
-
-                return 'occupancy-other';
-
-            }
-
-            */
-
-            return '';
-
-        },
-
-
-
-        getOccupancyDetails(status) {
-
-            return status && status.details ? status.details : '空闲';
-
-        },
-
-
-
-        calculateBaseDate() {
-
-            if (!this.searchForm.yearSemester) {
-
-                this.currentBaseDate = null;
-
-                return;
-
-            }
-
-
-
-            let semesterStartDate;
-
-            const yearMatch = this.searchForm.yearSemester.match(/^(\d{2})/);
-
-            let yearPrefix = new Date().getFullYear();
-
-
-
-            if (yearMatch && yearMatch[1]) {
-
-                yearPrefix = parseInt(yearMatch[1], 10);
-
-                yearPrefix = (yearPrefix < 70) ? (2000 + yearPrefix) : (1900 + yearPrefix);
-
-            }
-
-            const fullYear = yearPrefix;
-
-
-
-            if (this.searchForm.yearSemester.includes('春季学期')) {
-
-                semesterStartDate = new Date(fullYear, 1, 24);
-
-            } else if (this.searchForm.yearSemester.includes('秋季学期')) {
-
-                semesterStartDate = new Date(fullYear, 8, 1);
-
+            return isOccupied ? 'occupied' : 'available';
+        };
+
+        const handleBuildingChange = () => {
+            currentFloorPage.value = 1; // 切换教学楼时，重置回第一页
+            jumperPage.value = 1; // 重置跳转页码
+            searchLocation.value = ''; // 清空搜索框
+            fetchClassroomStatus(); // 重新获取数据
+        };
+
+        const handleFloorPageChange = (newPage) => {
+            currentFloorPage.value = newPage;
+            jumperPage.value = newPage; // 同步跳转输入框的值
+            fetchClassroomStatus();
+        };
+
+        const jumpToPage = () => {
+            // 确保跳转页码有效
+            const maxPage = Math.ceil(totalPagedLocationsCount.value / pageSize.value);
+            if (jumperPage.value >= 1 && jumperPage.value <= maxPage) {
+                currentFloorPage.value = jumperPage.value;
+                fetchClassroomStatus();
             } else {
-
-                console.warn('无法识别的学期格式，使用默认起始日期。');
-
-                semesterStartDate = new Date(fullYear, 0, 1);
-
+                // ElMessage.warning(`请输入有效页码，范围在 1 到 ${maxPage} 之间。`);
+                console.warn(`请输入有效页码，范围在 1 到 ${maxPage} 之间。`);
+                jumperPage.value = currentFloorPage.value; // 如果输入无效，还原为当前页
             }
+        };
+
+        watch([selectedSemester, currentWeekIndex], () => {
+            if (selectedSemester.value) {
+                fetchClassroomStatus();
+            }
+        });
+
+        watch(searchLocation, () => {
+            // 搜索框内容变化时，将当前页重置为1，并触发数据重新获取
+            currentFloorPage.value = 1;
+            jumperPage.value = 1;
+            // 如果搜索是前端过滤，这里不需要重新获取数据。
+            // 但因为“全部教学楼”模式下可能涉及到后端数据量大，
+            // 且搜索框可能需要和后端联动，所以这里调用 fetchClassroomStatus 是更安全的做法。
+            fetchClassroomStatus();
+        });
 
 
+        onMounted(() => {
+            fetchSemesters();
+        });
 
-            const dayOfWeek = semesterStartDate.getDay();
-
-            const daysToMonday = dayOfWeek === 0 ? -6 : -(dayOfWeek - 1);
-
-            semesterStartDate.setDate(semesterStartDate.getDate() + daysToMonday);
-
-
-
-            const daysToAdd = (this.searchForm.week - 1) * 7;
-
-            const baseDate = new Date(semesterStartDate);
-
-            baseDate.setDate(baseDate.getDate() + daysToAdd);
-
-            this.currentBaseDate = baseDate;
-
-        },
-
-
-
-        getFormattedDate(dayIndex) {
-
-            if (!this.currentBaseDate) return '';
-
-            const date = new Date(this.currentBaseDate);
-
-            date.setDate(date.getDate() + dayIndex);
-
-            return `${date.getMonth() + 1}/${date.getDate()}`;
-
-        }
-
+        return {
+            semesters,
+            selectedSemester,
+            classroomData,
+            loading,
+            errorMessage,
+            buildingMap, // 暴露 buildingMap 给模板
+            selectedBuildingPrefix,
+            searchLocation,
+            currentWeekIndex,
+            weeksInSemester,
+            totalWeeks,
+            daysOfWeek,
+            pagedLocations,
+            totalPagedLocationsCount,
+            pageSize,
+            currentFloorPage,
+            jumperPage,
+            getFormattedDate,
+            fetchClassroomStatus,
+            getClassroomStatus,
+            handleBuildingChange,
+            handleFloorPageChange,
+            jumpToPage,
+        };
     },
-
-    watch: {
-
-        'searchForm.week': {
-
-            handler(newVal, oldVal) {
-
-                if (newVal !== oldVal) {
-
-                    this.calculateBaseDate();
-
-                    this.fetchCourseOccupancy(); // 只获取课程
-
-                    //this.fetchExamOccupancy(); // 删除对考试的调用
-
-                    this.mergeAndApplyFilters();
-
-                }
-
-            },
-
-            deep: true
-
-        },
-
-        'searchForm.yearSemester': {
-
-            handler(newVal, oldVal) {
-
-                if (newVal !== oldVal && newVal) {
-
-                    this.calculateBaseDate();
-
-                    this.fetchClassroomBaseInfo(); // 重新生成模拟的基础教室
-
-                    this.fetchCourseOccupancy(); // 重新获取课程
-
-                    //this.fetchExamOccupancy(); // 删除对考试的调用
-
-                    this.mergeAndApplyFilters();
-
-                }
-
-            },
-
-            deep: true
-
-        },
-
-        'searchForm.building': 'handleSearch', // 教学楼变化时执行 handleSearch
-
-        'searchForm.classroom': 'handleSearch', // 教室号变化时执行 handleSearch
-
-    }
-
 };
-
 </script>
 
-
-
 <style scoped>
+#classroom-availability {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 25px;
+    max-width: 1800px; /* 进一步增加最大宽度 */
+    margin: 20px auto;
+    background-color: #f0f2f5;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
 
-/* 样式部分保持不变，但可以考虑删除 .occupancy-exam, .occupancy-experiment, .occupancy-other 的 CSS 规则，因为不再使用这些颜色 */
-
-.classroom-occupancy {
-
+.header-section {
+    background-color: #fff;
     padding: 20px;
-
-    background-color: #f5f7fa;
-
-}
-
-
-
-.el-card {
-
     border-radius: 8px;
-
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-
-}
-
-
-
-.clearfix:before,
-
-.clearfix:after {
-
-    display: table;
-
-    content: "";
-
-}
-
-.clearfix:after {
-
-    clear: both
-
-}
-
-.clearfix span {
-
-    font-weight: bold;
-
-    font-size: 18px;
-
-    color: #303133;
-
-}
-
-
-
-.search-panel {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 15px;
-
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     margin-bottom: 25px;
-
-    align-items: center;
-
-    background-color: #ffffff;
-
-    padding: 15px;
-
-    border-radius: 6px;
-
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
 }
 
-
-
-.current-semester-display {
-
-    font-size: 14px;
-
-    color: #606266;
-
-    font-weight: bold;
-
-    padding: 0 5px;
-
-    white-space: nowrap;
-
-}
-
-
-
-.search-panel .el-select,
-
-.search-panel .el-input {
-
-    width: 160px;
-
-}
-
-
-
-.legend-panel {
-
-    display: flex;
-
-    align-items: center;
-
+h1 {
+    text-align: left;
+    color: #2c3e50;
+    margin-top: 0;
     margin-bottom: 20px;
-
-    background-color: #ffffff;
-
-    padding: 10px 15px;
-
-    border-radius: 6px;
-
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
-    font-size: 14px;
-
+    font-size: 1.8em;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
 }
 
-
-
-.legend-title {
-
-    font-weight: bold;
-
-    color: #606266;
-
-    margin-right: 15px;
-
-    white-space: nowrap;
-
-}
-
-
-
-.legend-items {
-
+.search-controls {
     display: flex;
-
-    flex-wrap: wrap;
-
+    align-items: center;
     gap: 15px;
-
+    flex-wrap: wrap;
 }
 
+.search-controls label {
+    font-weight: bold;
+    color: #34495e;
+    font-size: 1em;
+    white-space: nowrap;
+}
 
+.search-controls select,
+.search-controls .search-input {
+    padding: 8px 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    font-size: 0.95em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 100px;
+}
+
+.search-controls select:focus,
+.search-controls .search-input:focus {
+    border-color: #409eff;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+    outline: none;
+}
+
+.search-input {
+    flex-grow: 0.5;
+    max-width: 150px;
+}
+
+.search-button {
+    padding: 8px 20px;
+    background-color: #409eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.search-button:hover {
+    background-color: #337ecc;
+    transform: translateY(-1px);
+}
+
+.loading-message, .error-message {
+    text-align: center;
+    padding: 30px;
+    font-size: 1.2em;
+    color: #7f8c8d;
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-weight: bold;
+    background-color: #fdeded;
+    border: 1px solid #e74c3c;
+}
+
+.legend {
+    margin: 20px 0;
+    text-align: left;
+    font-size: 0.95em;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend span {
+    font-weight: bold;
+}
 
 .legend-item {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    color: #606266;
-
-    white-space: nowrap;
-
-}
-
-
-
-.color-box {
-
+    display: inline-block;
     width: 18px;
-
     height: 18px;
-
     border-radius: 4px;
-
-    margin-right: 8px;
-
-    border: 1px solid rgba(0, 0, 0, 0.1);
-
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
-
+    vertical-align: middle;
 }
 
+.occupied-legend {
+    background-color: #f86657;
+}
 
+.available-legend {
+    background-color: #abefc8;
+}
 
-.occupancy-course { background-color: #F56C6C; }
-
-.occupancy-free { background-color: #EBEEF5; }
-
-/* 删除这些不再使用的样式 */
-
-/* .occupancy-exam { background-color: #E6A23C; } */
-
-/* .occupancy-experiment { background-color: #409EFF; } */
-
-/* .occupancy-other { background-color: #909399; } */
-
-
-
-
-
-.occupancy-grid {
-
-    display: grid;
-
-    grid-template-columns: 120px repeat(7, 1fr);
-
-    border: 1px solid #DCDFE6;
-
-    border-radius: 8px;
-
+.classroom-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
     overflow: hidden;
-
-    background-color: #ffffff;
-
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
 }
 
-
-
-.grid-header, .grid-row {
-
-    display: contents;
-
-}
-
-
-
-.grid-cell {
-
-    border: 1px solid #EBEEF5;
-
-    box-sizing: border-box;
-
-    text-align: center;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    flex-direction: column;
-
-    font-size: 14px;
-
-    color: #606266;
-
+.classroom-table th,
+.classroom-table td {
+    border: 1px solid #e0e0e0;
     padding: 0;
-
+    text-align: center;
+    vertical-align: top;
+    position: relative;
+    min-width: 80px;
 }
 
-
-
-.time-header {
-
-    background-color: #F5F7FA;
-
-    border-top-left-radius: 8px;
-
+.classroom-table th.location-col,
+.classroom-table td.location-col {
+    padding: 15px 10px;
+    background-color: #f7f7f7;
+    font-weight: bold;
+    color: #333;
+    width: 80px;
+    min-width: unset;
 }
 
-
+.classroom-table th {
+    background-color: #e8f5e9;
+    color: #333;
+    font-weight: 700;
+    font-size: 0.95em;
+}
 
 .day-header {
-
-    background-color: #F5F7FA;
-
-    font-weight: bold;
-
-    position: relative;
-
-    padding-top: 8px;
-
-    padding-bottom: 8px;
-
-}
-
-.grid-header .grid-cell:last-child {
-
-    border-top-right-radius: 8px;
-
-}
-
-
-
-.date-hint {
-
-    font-size: 12px;
-
-    color: #909399;
-
-    margin-top: 4px;
-
-    margin-bottom: 8px;
-
-}
-
-
-
-.session-numbers {
-
+    padding: 10px 0 5px;
+    border-bottom: 1px solid #d0d0d0;
     display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
 
+.date-header {
+    font-size: 0.8em;
+    color: #666;
+}
+
+.periods-row-header {
+    display: flex;
     justify-content: space-around;
-
-    width: 100%;
-
-    font-size: 12px;
-
-    color: #909399;
-
-    border-top: 1px solid #DCDFE6;
-
-    padding-top: 4px;
-
+    padding: 5px 0;
+    background-color: #f0f8f0;
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #555;
 }
 
-.session-numbers span {
-
-    flex: 1;
-
+.periods-row-header span {
+    width: calc(100% / 7);
     text-align: center;
-
 }
 
-
-
-.classroom-label {
-
-    background-color: #F5F7FA;
-
-    font-weight: bold;
-
-    padding: 8px 5px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-
-.occupancy-day-cell {
-
-    display: grid;
-
-    grid-template-rows: repeat(v-bind(sessionsPerDay), 1fr);
-
-    padding: 0;
-
-    border: none;
-
-}
-
-
-
-.occupancy-day-cell > div {
-
-    width: 100%;
-
-    height: auto;
-
-    border: 1px solid #DCDFE6;
-
-    border-width: 0 1px 1px 0;
-
-    box-sizing: border-box;
-
+.periods-row {
     display: flex;
+    height: 30px;
+    width: 100%;
+}
 
-    justify-content: center;
-
+.periods-row div {
+    flex: 1;
+    height: 100%;
+    display: flex;
     align-items: center;
-
-    font-size: 12px;
-
-    cursor: pointer;
-
+    justify-content: center;
+    border-left: 1px solid #eee;
+    box-sizing: border-box;
     transition: background-color 0.2s ease;
-
-    color: #303133;
-
 }
 
-
-
-.occupancy-day-cell:last-child > div {
-
-    border-right-width: 0;
-
+.periods-row div:first-child {
+    border-left: none;
 }
 
-.occupancy-day-cell > div:last-child {
-
-    border-bottom-width: 0;
-
+.available {
+    background-color: #abefc8;
+    cursor: pointer;
 }
 
+.occupied {
+    background-color: #f86657;
+}
 
-
-.no-data-message {
-
-    grid-column: 1 / span 8; /* 让消息横跨整个表格 */
-
+.bottom-pagination {
+    margin-top: 25px;
     text-align: center;
-
-    padding: 40px 0;
-
-    color: #909399;
-
-    font-size: 16px;
-
-    background-color: #ffffff;
-
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 
-
-
-.pagination-bottom {
-
-    margin-top: 20px;
-
-    text-align: right;
-
-    padding: 10px 0;
-
+.page-jumper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 15px;
+    color: #555;
 }
 
+.jumper-input {
+    width: 60px;
+    padding: 6px 8px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.jumper-button {
+    padding: 6px 12px;
+    background-color: #409eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.jumper-button:hover {
+    background-color: #337ecc;
+}
+
+.total-pages {
+    font-size: 0.9em;
+    margin-left: 5px;
+    color: #777;
+}
 </style>
