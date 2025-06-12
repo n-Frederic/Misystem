@@ -30,7 +30,11 @@
                  INNER JOIN studentms.ct ct ON e.cno = ct.cno
                  INNER JOIN studentms.c c ON c.cid = ct.cid
     </select>
-
+    <!-- 根据课程号删除考试信息 -->
+    <delete id="deleteById">
+        DELETE FROM exam
+        WHERE cno = #{cno}
+    </delete>
 
     <!-- 插入考试信息 -->
     <insert id="insertExam" >
