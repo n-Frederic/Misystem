@@ -47,6 +47,7 @@ import queryExam from "@/views/Admin/examManage/AdminQueryExam.vue";
 import editorExam from "@/views/Admin/examManage/editorExam";
 import queryExam1 from "@/views/Student/My-Exam/queryExam1";
 import addExam from "@/views/Admin/examManage/AdminAddExam.vue";
+import TeacherQueryExam from "@/views/Teacher/examManage/TeacherQueryExam";
 
 Vue.use(VueRouter)
 
@@ -302,6 +303,20 @@ const routes = [
             component: offerCourse,
             meta: {requireAuth: true}
           },
+        ]
+      },
+      {
+        path: '/examManage',
+        name: '考试管理',
+        component: { render: h => h('router-view') }, // 占位组件
+        meta: { requireAuth: true },
+        children: [
+          {
+            path: '/teacherQueryExam',
+            name: '考试查询',
+            component: TeacherQueryExam,
+            meta: { requireAuth: true }
+          }
         ]
       },
       {
