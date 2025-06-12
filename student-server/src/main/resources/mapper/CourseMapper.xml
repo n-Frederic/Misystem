@@ -29,7 +29,7 @@
         </where>
     </select>
 
-    <select id="findBySearch" resultType="classroomUseInfo">
+    <select id="getAllCourses" resultType="classroomUseInfo">
         SELECT location, day, period
         from studentms.c
     </select>

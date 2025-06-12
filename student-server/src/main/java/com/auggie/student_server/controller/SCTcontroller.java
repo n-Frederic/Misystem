@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/SC")
+@RequestMapping("/SCT")
 public class SCTcontroller {
     @Autowired
     private StudentCourseService studentCourseService;
@@ -25,6 +25,7 @@ public class SCTcontroller {
         System.out.println("正在保存 sc 记录：" + studentCourse);
         return studentCourseService.save(studentCourse) ? "选课成功" : "选课失败，联系管理员";
     }
+
 
     @GetMapping("/findBySid/{sid}/{term}")
     public List<CourseTeacherInfo> findBySid(@PathVariable Integer sid, @PathVariable String term) {
