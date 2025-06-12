@@ -29,7 +29,8 @@ public class ExamController {
     }
     @GetMapping("/findTeacherExam/{tid}/{term}")
     public List<Exam> findTeacherExam(@PathVariable Integer tid,@PathVariable String term) {
-        return examService.findTeacherExam(tid,term);
+        List<Exam> exams = examService.findTeacherExam(tid,term);
+        return exams;
     }
 
     @GetMapping("/findAllExam")
