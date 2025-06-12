@@ -319,45 +319,29 @@ export default {
             try {
 
                 const params = {
-
                     term: this.searchForm.yearSemester,
-
                     week: this.searchForm.week,
-
-                    building: this.searchForm.building, // 确保这些参数被发送到后端
-
+                    building: this.searchForm.building,
                     classroom: this.searchForm.classroom
-
                 };
 
-                // **替换为你的实际课程表 API 接口**
 
-                const response = await axios.get('http://localhost:10086/course/findCourse', { params: params });
-
+                const response = await axios.get('http://localhost:10086/course/getAllCourses', { params: params });
                 const courseSchedules = response.data; // 假设后端返回的是课程安排数组
-
-
 
                 this.courseOccupancyData = this.updateOccupancyData(
 
                     JSON.parse(JSON.stringify(this.allOccupancyData)), // 基于模拟生成的基础数据
 
                     courseSchedules,
-
                     'course'
-
                 );
 
-
-
                 this.mergeAndApplyFilters();
-
-
 
             } catch (error) {
 
                 console.error('获取课程占用数据失败:', error);
-
                 this.$message.error('获取课程占用数据失败，请检查网络或后端服务11');
 
                 this.courseOccupancyData = JSON.parse(JSON.stringify(this.allOccupancyData)); // 失败时重置
@@ -486,13 +470,13 @@ export default {
 
             schedules.forEach(item => {
 
-                const classroomNameFromBackend = item.classroomName || item.name; // 教室名称
+                const classroomNameFromBackend = item.location || item.name; // 教室名称
 
-                const dayOfWeek = item.dayOfWeek;
+                const dayOfWeek = item.day;
 
-                const session = item.session;
+                const session = item.period;
 
-                const details = item.details || item.courseName; // 只需要课程名称作为详情
+               // const details = item.details || item.courseName; // 只需要课程名称作为详情
 
 
 
@@ -507,12 +491,8 @@ export default {
                         classroomEntry = room;
 
                         break;
-
                     }
-
                 }
-
-
 
                 if (classroomEntry) {
 
