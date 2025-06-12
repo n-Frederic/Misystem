@@ -3,50 +3,29 @@
     <el-table
         :data="tableData"
         border
+        show-header
         stripe
         style="width: 100%">
       <el-table-column
           fixed
           prop="cno"
-          label="课程号"
+          label="课号"
           width="150">
       </el-table-column>
       <el-table-column
           prop="cname"
-          label="课程名"
+          label="课程号"
           width="150">
       </el-table-column>
       <el-table-column
-          fixed
           prop="tid"
-          label="工号"
-          width="100">
+          label="教师号"
+          width="150">
       </el-table-column>
       <el-table-column
           prop="tname"
-          label="教师名"
-          width="100">
-      </el-table-column>
-      <el-table-column
-          fixed
-          prop="sid"
-          label="学号"
-          width="100">
-      </el-table-column>
-      <el-table-column
-          prop="sname"
-          label="学生名"
-          width="100">
-      </el-table-column>
-      <el-table-column
-          prop="grade"
-          label="成绩"
-          width="100">
-      </el-table-column>
-      <el-table-column
-          prop="term"
-          label="学期"
-          width="100">
+          label="教师名称"
+          width="150">
       </el-table-column>
       <el-table-column
           label="操作"
@@ -58,11 +37,10 @@
               icon="el-icon-info"
               icon-color="red"
               title="删除不可复原"
-              @confirm="deleteTeacher(scope.row)"
+              @confirm="deleteCourseTeacher(scope.row)"
           >
             <el-button slot="reference" type="text" size="small">删除</el-button>
           </el-popconfirm>
-          <el-button @click="editor(scope.row)" type="text" size="small">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -82,16 +60,38 @@ export default {
   methods: {
     select(row) {
       console.log(row)
-    },
-    deleteTeacher(row) {
-      const that = this
-      console.log(row)
-      const sid = row.sid
       const cno = row.cno
       const tid = row.tid
-      const term = row.term
-      axios.get("http://localhost:10086/SC/deleteById/" + sid + '/' + cno + '/' + tid + '/' + term).then(function (resp) {
-        console.log(resp)
+      const sid = sessionStorage.getItem('sid')
+      const term = sessionStorage.getItem('currentTerm')
+      const sct = {
+        cno: cno,
+        tid: tid,
+        sid: sid,
+        term: term
+      }
+      const that = this
+      axios.post('http://localhost:10086/SC/save', sct).then(function (resp) {
+        if (resp.data === true) {
+          that.$message({
+            showClose: true,
+            message: '选课成功',
+            type: 'success'
+          });
+        }
+        else {
+          that.$message({
+            showClose: true,
+            message: '选课出错，请联系管理员',
+            type: 'error'
+          });
+        }
+      })
+
+    },
+    deleteCourseTeacher(row) {
+      const that = this
+      axios.post('http://localhost:10086/courseTeacher/deleteById', row).then(function (resp) {
         if (resp.data === true) {
           that.$message({
             showClose: true,
@@ -107,12 +107,6 @@ export default {
             type: 'error'
           });
         }
-      }).catch(function (error) {
-        that.$message({
-          showClose: true,
-          message: '删除出错，存在外键依赖',
-          type: 'error'
-        });
       })
     },
     changePage(page) {
@@ -123,41 +117,28 @@ export default {
       let ans = (end < length) ? end : length
       that.tableData = that.tmpList.slice(start, ans)
     },
-    editor(row) {
-      this.$router.push({
-        path: '/editorGradeCourse',
-        query: {
-          cid: row.cid,
-          tid: row.tid,
-          sid: row.sid,
-          term: row.term
-        }
-      })
-    }
   },
+
   data() {
     return {
       tableData: null,
       pageSize: 10,
       total: null,
       tmpList: null,
+      type: sessionStorage.getItem('type')
     }
   },
   props: {
-    ruleForm: Object,
+    ruleForm: Object
   },
   watch: {
     ruleForm: {
       handler(newRuleForm, oldRuleForm) {
-        console.log("组件监听 form")
-        console.log(newRuleForm)
         const that = this
         that.tmpList = null
         that.total = null
         that.tableData = null
-        axios.post("http://localhost:10086/SC/findBySearch", newRuleForm).then(function (resp) {
-          console.log("查询结果:");
-          console.log(resp)
+        axios.post("http://localhost:10086/courseTeacher/findCourseTeacherInfo", newRuleForm).then(function (resp) {
           that.tmpList = resp.data
           that.total = resp.data.length
           let start = 0, end = that.pageSize

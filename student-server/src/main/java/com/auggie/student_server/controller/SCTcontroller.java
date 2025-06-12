@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/SCT")
+@RequestMapping("/SC")
 public class SCTcontroller {
     @Autowired
     private StudentCourseService studentCourseService;

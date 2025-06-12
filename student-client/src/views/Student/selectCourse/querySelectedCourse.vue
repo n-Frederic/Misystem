@@ -86,7 +86,7 @@ export default {
       const sct = { cno, tid, sid, term }
 
       const that = this
-      axios.post('http://localhost:10086/SCT/deleteBySCT', sct).then(function (resp) {
+      axios.post('http://localhost:10086/SC/deleteBySCT', sct).then(function (resp) {
         if (resp.data === true) {
           that.$message({ showClose: true, message: '退课成功', type: 'success' })
           window.location.reload()
@@ -114,7 +114,7 @@ export default {
     const that = this
 
     // 获取学生选课表
-    axios.get('http://localhost:10086/SCT/findBySid/' + sid + '/' + term).then(function (resp) {
+    axios.get('http://localhost:10086/SC/findBySid/' + sid + '/' + term).then(function (resp) {
       that.tmpList = resp.data
       that.total = resp.data.length
       let start = 0, end = that.pageSize

@@ -112,7 +112,7 @@ export default {
         async fetchSemesters() {
             try {
                 // 假设后端获取学期列表的接口是 /SCT/findAllTerm
-                const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
+                const response = await axios.get('http://localhost:10086/SC/findAllTerm');
                 // **核心修改：将后端返回的字符串转换为 { label, value } 对象**
                 this.semesterOptions = response.data.map(termString => {
                     const parts = termString.split('-'); // 例如 "25", "春季学期"
