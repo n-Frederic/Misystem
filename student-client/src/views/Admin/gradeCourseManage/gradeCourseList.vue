@@ -83,7 +83,7 @@ export default {
       console.log(row)
       const sid = row.sid
       const cno = row.cno
-      const tid = row.tid
+      // const tid = row.tid
       const term = row.term
       axios.get("http://localhost:10086/SC/deleteById/" + sid + '/' + cno + '/' + tid + '/' + term).then(function (resp) {
         console.log(resp)
@@ -123,7 +123,7 @@ export default {
         path: '/editorGradeCourse',
         query: {
           cno: row.cno,
-          tid: row.tid,
+          // tid: row.tid,
           sid: row.sid,
           term: row.term,
           cname: row.cname,
