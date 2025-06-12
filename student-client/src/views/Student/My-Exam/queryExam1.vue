@@ -92,10 +92,8 @@ export default {
     },
     created() {
         this.fetchSemesters(); // 组件创建时首先获取学期信息
-        // 考试数据会在 `searchForm.yearSemester` 发生变化时通过 `watch` 触发 `fetchExamData`
     },
     watch: {
-        // 监听 searchForm.yearSemester 的变化，一旦有了值就立即获取考试数据
         'searchForm.yearSemester': {
             handler(newVal) {
                 if (newVal) { // 只有当学期有值时才去获取考试数据
@@ -110,56 +108,30 @@ export default {
          * 获取所有学期信息
          */
         async fetchSemesters() {
-            try {
-                // 假设后端获取学期列表的接口是 /SCT/findAllTerm
-                const response = await axios.get('http://localhost:10086/SC/findAllTerm');
-                // **核心修改：将后端返回的字符串转换为 { label, value } 对象**
-                this.semesterOptions = response.data.map(termString => {
-                    const parts = termString.split('-'); // 例如 "25", "春季学期"
-                    const yearSuffix = parts[0]; // "25"
-                    const season = parts[1]; // "春季学期"
+          try {
+            const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:10086';
+            const response = await axios.get(`${API_BASE_URL}/SC/findAllTerm`);
 
-                    // 推断完整年份，例如 25 转换为 2025
-                    // 这里假设都是当前世纪的年份，如果跨世纪需要更复杂的逻辑
-                    const currentYear = new Date().getFullYear(); // 2025
-                    const centuryPrefix = String(currentYear).substring(0, 2); // "20"
-                    const fullYear = parseInt(`${centuryPrefix}${yearSuffix}`);
+            // 直接使用后端返回的字符串作为 label 和 value，不做任何转换
+            this.semesterOptions = response.data.map(termString => ({
+              label: termString, // 保持原始格式，如 "25-春季学期"
+              value: termString  // 直接使用原始字符串作为 value
+            }));
 
-                    let semesterValue = '';
-                    if (season.includes('春季')) {
-                        semesterValue = '1';
-                    } else if (season.includes('秋季')) {
-                        semesterValue = '2';
-                    } else if (season.includes('夏季')) { // 如果有夏季学期
-                        semesterValue = '3';
-                    }
-                    // 注意：这里假设后端期望的格式是 "YYYY-S"
-                    return {
-                        label: termString,              // 例如 "25-春季学期"
-                        value: `${fullYear}-${semesterValue}` // 例如 "2025-1"
-                    };
-                }).sort((a, b) => { // 排序以确保学期顺序正确，例如最新学期在前
-                    const yearA = parseInt(a.value.split('-')[0]);
-                    const yearB = parseInt(b.value.split('-')[0]);
-                    const semA = parseInt(a.value.split('-')[1]);
-                    const semB = parseInt(b.value.split('-')[1]);
-                    if (yearA !== yearB) return yearB - yearA; // 年份降序
-                    return semB - semA; // 同一年份学期降序
-                });
-
-
-                // 如果当前没有选择学期，则默认选中第一个学期（转换后的 value）
-                if (!this.searchForm.yearSemester && this.semesterOptions.length > 0) {
-                    this.searchForm.yearSemester = this.semesterOptions[0].value;
-                }
-            } catch (error) {
-                console.error('获取学期信息失败:', error);
-                this.$message.error('获取学期信息失败，请检查网络或后端服务');
-                if (!this.searchForm.yearSemester) {
-                    this.searchForm.yearSemester = '2024-2025-2';
-                    sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
-                }
+            // 默认选中第一个学期
+            if (!this.searchForm.yearSemester && this.semesterOptions.length > 0) {
+              this.searchForm.yearSemester = this.semesterOptions[0].value;
+              sessionStorage.setItem('currentTerm', this.searchForm.yearSemester);
             }
+          } catch (error) {
+            console.error('获取学期信息失败:', error.message, error.response?.data);
+            this.$message.error('获取学期信息失败，请检查网络或后端服务');
+            if (!this.searchForm.yearSemester) {
+              const defaultTerm = '25-春季学期'; // 根据实际需求调整默认值
+              this.searchForm.yearSemester = defaultTerm;
+              sessionStorage.setItem('currentTerm', defaultTerm);
+            }
+          }
         },
 
         /**
@@ -176,14 +148,6 @@ export default {
                 const sid = sessionStorage.getItem('sid');
                 const term = this.searchForm.yearSemester;
 
-                // **显示在页面上的调试信息**
-                this.debugSid = sid;
-                this.debugTerm = term;
-
-                // 调试输出到控制台
-                console.log('DEBUG: 准备发送考试安排请求 - SID:', sid, 'Term:', term);
-
-                // **严格检查 sid 和 term 是否存在，避免拼接出 "null" 或 "undefined"**
                 if (!sid) {
                     this.$message.error('学生ID缺失，请重新登录。');
                     this.allExams = [];
@@ -194,20 +158,18 @@ export default {
                     this.$message.error('学期信息缺失，无法获取考试安排。');
                     this.allExams = [];
                     this.applyFilters();
-                    return; // 提前退出
+                    return;
                 }
 
-                // **确认已将 axios.post 改为 axios.get**
-                // 使用模板字符串拼接 URL 更清晰
                 const response = await axios.get(`http://localhost:10086/exams/findExam/${sid}/${term}`);
 
-                this.allExams = response.data; // 假设后端返回的是已过滤的考试列表
-                this.applyFilters(); // 即使后端已过滤，这里也调用一次，以防万一或用于进一步客户端过滤
-                this.$message.success('考试安排数据获取成功！'); // 成功提示
+                this.allExams = response.data;
+                this.applyFilters();
+                this.$message.success('考试安排数据获取成功！');
             } catch (error) {
                 console.error('获取考试安排数据失败:', error);
                 this.$message.error('获取考试安排信息失败，请检查网络或后端服务');
-                this.allExams = []; // 清空数据
+                this.allExams = []; 
                 this.applyFilters();
             }
         },
