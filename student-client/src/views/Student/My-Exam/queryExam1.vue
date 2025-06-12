@@ -20,12 +20,6 @@
                 <el-button type="primary" @click="handleSearch">查询</el-button>
             </div>
 
-            <div style="margin-bottom: 15px; padding: 10px; border: 1px dashed #ccc; background-color: #f9f9f9; font-size: 14px;">
-                <p>当前请求 SID: <span style="font-weight: bold; color: blue;">{{ debugSid || '未获取' }}</span></p>
-                <p>当前请求 Term: <span style="font-weight: bold; color: blue;">{{ debugTerm || '未获取' }}</span></p>
-                <p style="color: gray;">(这些值将在发送考试安排请求时使用)</p>
-            </div>
-
             <el-table :data="filteredExams" style="width: 100%" border>
                 <el-table-column
                     prop="cno"
