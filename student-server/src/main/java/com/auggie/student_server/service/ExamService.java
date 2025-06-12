@@ -8,6 +8,7 @@ import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 
 @Service
@@ -31,6 +32,13 @@ public List<Exam> findExam(Integer sid, String term){
         List<Exam> list = examMapper.findAllExam();
         return list;
     }
+    public boolean insertExam(Exam e){
+
+        boolean result=examMapper.insertExam(e.getCno(), (Date) e.getDay(),e.getPeriod(),e.getDurationMin(),e.getGrade(),e.getLocation(),e.getReq());
+        return result;
+    }
+
+
 
 
 }

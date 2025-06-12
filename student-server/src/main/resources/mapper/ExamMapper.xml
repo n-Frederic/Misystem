@@ -32,4 +32,26 @@
     </select>
 
 
+    <!-- 插入考试信息 -->
+    <insert id="insertExam" >
+        INSERT INTO exam (
+            cno,
+            day,
+            period,
+            durationMin,
+            grade,
+            location,
+            Req
+        ) VALUES (
+                     #{cno},
+                     #{day},
+                     #{period},
+                     #{durationMin},
+                     #{grade},
+                     #{location},
+                     #{req}
+                 )
+    </insert>
+
+
 </mapper>

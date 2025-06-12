@@ -10,6 +10,7 @@ import com.auggie.student_server.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,5 +36,41 @@ public class ExamController {
     public List<Exam> findAllExam() {
         return examService.findAllExam();
     }
+
+    /**
+     * 添加考试
+     * @param exam 考试信息
+     * @return 响应结果
+     */
+    @PostMapping("/add")
+    public Map<String, Object> addExam(@RequestBody Exam exam) {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // 参数验证
+            if (exam.getCno() == null) {
+                result.put("success", false);
+                result.put("message", "课程编号不能为空");
+                return result;
+            }
+
+            boolean success = examService.insertExam(exam);
+            result.put("success", success);
+
+            if (success) {
+                result.put("message", "考试添加成功");
+            } else {
+                result.put("message", "考试添加失败，该课程可能已存在考试");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "系统异常：" + e.getMessage());
+        }
+
+        return result;
+    }
+
 
 }
