@@ -16,12 +16,7 @@
           label="课程名"
           width="150">
       </el-table-column>
-      <el-table-column
-          fixed
-          prop="tid"
-          label="工号"
-          width="100">
-      </el-table-column>
+
       <el-table-column
           prop="tname"
           label="教师名"

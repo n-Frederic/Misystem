@@ -30,8 +30,8 @@
     </select>
 
     <select id="getAllCourses" resultType="classroomUseInfo">
-        SELECT c.location, c.day, c.period
-        from studentms.c
+        SELECT location, day, period
+        FROM studentms.ct
     </select>
 
     <update id="updateById">
