@@ -17,7 +17,7 @@ public class ScInfo {
     private String tname;
     private String sname;
 
-    private Float dailyGrade;
+    private Float daily_grade;
     private String term;
 
     public Integer getSid() {
@@ -52,15 +52,13 @@ public class ScInfo {
         this.sname = sname;
     }
 
-    public Float getDailyGrade() {
-        return dailyGrade;
+    public Float getDaily_grade() {
+        return daily_grade;
     }
 
-    public void setDailyGrade(Float dailyGrade) {
-        this.dailyGrade = dailyGrade;
+    public void setDaily_grade(Float daily_grade) {
+        this.daily_grade = daily_grade;
     }
-
-
 
     public String getCname() {
         return cname;
