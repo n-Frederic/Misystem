@@ -69,7 +69,7 @@ export default {
     },
     async fetchSemesters() {
       try {
-        const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
+        const response = await axios.get('http://localhost:10086/SC/findAllTerm');
         this.semesterOptions = response.data.map(termString => {
           const parts = termString.split('-');
           const yearSuffix = parts[0];

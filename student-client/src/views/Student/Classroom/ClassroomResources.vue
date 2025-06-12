@@ -135,7 +135,7 @@ export default {
     methods: {
         async fetchCurrentSemester() {
             try {
-                const response = await axios.get('http://localhost:10086/SCT/findAllTerm');
+                const response = await axios.get('http://localhost:10086/SC/findAllTerm');
                 const semesters = response.data;
                 if (semesters && semesters.length > 0) {
                     this.searchForm.yearSemester = semesters[0]; // 假设后端返回的第一个是当前学期

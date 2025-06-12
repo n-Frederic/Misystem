@@ -81,7 +81,7 @@ export default {
         term: term
       }
       const that = this
-      axios.post('http://localhost:10086/SCT/save', sct).then(function (resp) {
+      axios.post('http://localhost:10086/SC/save', sct).then(function (resp) {
         if (resp.data === '选课成功') {
           that.$message({
             showClose: true,
