@@ -49,12 +49,12 @@ public class SCcontroller {
         return studentCourseService.findBySearch(map);
     }
 
-    @GetMapping("/findById/{sid}/{cid}/{tid}/{term}")
+    @GetMapping("/findById/{sid}/{cno}/{tid}/{term}")
     public ScInfo findById(@PathVariable Integer sid,
-                           @PathVariable Integer cid,
+                           @PathVariable Integer cno,
                            @PathVariable Integer tid,
                            @PathVariable String term) {
-        return studentCourseService.findByIdWithTerm(sid, cid, tid, term);
+        return studentCourseService.findByIdWithTerm(sid, cno, tid, term);
     }
 
     @GetMapping("/updateById/{sid}/{cid}/{tid}/{term}/{grade}")
