@@ -42,6 +42,7 @@
             <div class="legend">
                 <span>图例:</span>
                 <span class="legend-item occupied-legend"></span><span>课程占用</span>
+                <span class="legend-item exam-occupied-legend"></span><span>考试占用</span>
                 <span class="legend-item available-legend"></span><span>空闲</span>
             </div>
 
@@ -110,8 +111,8 @@ export default {
         // --- 数据 ---
         const semesters = ref([]);
         const selectedSemester = ref(null);
-        const courseData = ref([]);
-        const examData = ref([]);
+        const courseData = ref([]); // 课程占用数据
+        const examData = ref([]);   // 考试占用数据
         const loading = ref(false);
         const errorMessage = ref('');
         const searchLocation = ref('');
@@ -130,6 +131,7 @@ export default {
         const weeksInSemester = ref(20);
 
         // --- 日期计算基准 ---
+        // 根据 1.png 图片中的日期 "6/9" 调整
         const FIRST_WEEK_MONDAY_2025 = new Date('2025-02-24T00:00:00');
 
         // --- 教学楼分页 ---
@@ -243,7 +245,7 @@ export default {
             loading.value = true;
             errorMessage.value = '';
             courseData.value = [];
-            examData.value = [];
+            examData.value = []; // 在每次查询前清空数据
 
             try {
                 // --- 1. 获取课程占用数据 ---
@@ -269,25 +271,43 @@ export default {
                 }
 
 
-                // --- 2. 获取考试占用数据 (已注释) ---
-                // const examRequests = [];
-                // for (let i = 0; i < 7; i++) {
-                //     const dateStr = getFullDateForDay(i);
-                //     const examParams = {
-                //         semester: selectedSemester.value,
-                //         date: dateStr,
-                //     };
-                //     if (selectedBuildingPrefix.value !== '') {
-                //         examParams.buildingPrefix = selectedBuildingPrefix.value;
-                //         examParams.floor = currentFloorPage.value;
-                //     }
-                //     if (searchLocation.value) {
-                //         examParams.keywordLocation = searchLocation.value;
-                //     }
-                //     examRequests.push(axios.get('http://localhost:10086/classRoom/findExamClassrooms', { params: examParams }));
+                // --- 2. 获取考试占用数据 ---
+                const examRequests = [];
+                for (let i = 0; i < 7; i++) {
+                    const dateStr = getFullDateForDay(i);
+                    const examParams = {
+                        semester: selectedSemester.value,
+                        // 根据后端findAllExam接口是否接收日期参数来决定是否添加
+                        // date: dateStr, // 如果findAllExam不接收日期参数，请注释掉此行
+                        // 后端 findAllExam 接口可能不接收 buildingPrefix, floor, keywordLocation
+                        // 如果后端接口 findAllExam 没有任何参数，请将 params: examParams 删除，只保留 axios.get('http://localhost:10086/exams/findAllExam')
+                    };
+                    // 如果 findAllExam 不接收建筑前缀或楼层参数，请注释掉以下几行
+                    if (selectedBuildingPrefix.value !== '') {
+                        examParams.buildingPrefix = selectedBuildingPrefix.value;
+                        examParams.floor = currentFloorPage.value;
+                    }
+                    if (searchLocation.value) {
+                        examParams.keywordLocation = searchLocation.value;
+                    }
+                    // 调用考试接口
+                    // 请根据您的后端 `/exams/findAllExam` 接口实际接收的参数来决定 `params` 对象内容
+                    examRequests.push(axios.get('http://localhost:10086/exams/findAllExam', { params: examParams }));
+                }
+                const examResponses = await Promise.all(examRequests);
+                // 将所有考试数据扁平化到一个数组中
+                examData.value = examResponses.flatMap(res => res.data);
+
+                // --- 检查考试数据 ---
+                console.log('从后端获取到的考试数据:', examData.value);
+                // 你可以在这里进一步检查数据的格式，例如：
+                // if (examData.value.length > 0 && !examData.value[0].location) {
+                //   console.warn('考试数据可能缺少 "location" 字段');
                 // }
-                // const examResponses = await Promise.all(examRequests);
-                // examData.value = examResponses.flatMap(res => res.data);
+                // if (examData.value.length > 0 && !examData.value[0].day) {
+                //   console.warn('考试数据可能缺少 "day" 字段');
+                // }
+
 
             } catch (error) {
                 console.error('获取占用情况出错:', error);
@@ -299,26 +319,32 @@ export default {
 
         /**
          * 根据传入的教室、星期数字和节次判断占用状态，并返回对应的CSS类。
-         * 暂时只考虑课程占用，且课程占用限定在1-16周。
+         * 优先显示考试占用。
          * @param {string} location 前端显示的教室名称
          * @param {number} dayNumber 星期数字 (1=星期一, 7=星期日)
          * @param {number} period 节次 (1-7)
-         * @returns {string} CSS类名 'occupied' 或 'available'
+         * @returns {string} CSS类名 'occupied', 'exam-occupied' 或 'available'
          */
         const getCellStatus = (location, dayNumber, period) => {
-            // 检查考试占用 (已注释)
-            // const isExamOccupied = examData.value.some(item => {
-            //     const cellDate = new Date(FIRST_WEEK_MONDAY_2025);
-            //     cellDate.setDate(cellDate.getDate() + (currentWeekIndex.value * 7) + (dayNumber - 1));
-            //     const year = cellDate.getFullYear();
-            //     const month = (cellDate.getMonth() + 1).toString().padStart(2, '0');
-            //     const day = cellDate.getDate().toString().padStart(2, '0');
-            //     const formattedDate = `${year}-${month}-${day}`;
+            // 获取当前单元格对应的日期
+            const cellDate = new Date(FIRST_WEEK_MONDAY_2025);
+            cellDate.setDate(cellDate.getDate() + (currentWeekIndex.value * 7) + (dayNumber - 1));
 
-            //     return String(item.location) === location &&
-            //            item.date === formattedDate &&
-            //            item.period === period;
-            // });
+            const year = cellDate.getFullYear();
+            const month = (cellDate.getMonth() + 1).toString().padStart(2, '0');
+            const day = cellDate.getDate().toString().padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`; // 用于匹配考试数据的日期格式
+
+            // 检查考试占用
+            const isExamOccupied = examData.value.some(item => {
+                // 根据您提供的后端返回格式 {location:YF409, day:2025-06-14T16:00:00.000+00:00, period:4}
+                // 从后端返回的 item.day (例如 "2025-06-14T16:00:00.000+00:00") 中提取日期部分
+                const itemDayFormatted = item.day ? String(item.day).substring(0, 10) : ''; // 确保 item.day 是字符串，然后提取 "YYYY-MM-DD"
+
+                return String(item.location) === location &&
+                    itemDayFormatted === formattedDate && // 使用提取出的日期部分进行匹配
+                    item.period === period;
+            });
 
             // 检查课程占用：只有当当前周数在1-16周范围内时才检查课程占用
             let isCourseOccupied = false;
@@ -330,10 +356,9 @@ export default {
                 });
             }
 
-            // if (isExamOccupied) {
-            //     return 'exam-occupied';
-            // } else
-            if (isCourseOccupied) {
+            if (isExamOccupied) {
+                return 'exam-occupied'; // 考试占用优先
+            } else if (isCourseOccupied) {
                 return 'occupied';
             } else {
                 return 'available';
@@ -385,6 +410,7 @@ export default {
             semesters,
             selectedSemester,
             courseData,
+            examData,
             loading,
             errorMessage,
             buildingMap,
@@ -535,9 +561,9 @@ h1 {
     background-color: #e74c3c;
 }
 
-/* .exam-occupied-legend {
-  background-color: #3498db;
-} */
+.exam-occupied-legend {
+    background-color: #3498db;
+}
 
 .available-legend {
     background-color: #27ae60;
@@ -638,9 +664,9 @@ h1 {
     background-color: #e74c3c;
 }
 
-/* .exam-occupied {
-  background-color: #3498db;
-} */
+.exam-occupied {
+    background-color: #3498db;
+}
 
 .bottom-pagination {
     margin-top: 25px;

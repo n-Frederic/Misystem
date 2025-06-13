@@ -67,6 +67,11 @@ public class SCcontroller {
         System.out.println("sid+"+sid+"cno"+cno+"term"+term+"grade"+grade);
         return studentCourseService.updateById(sid, cno,  term, grade);
     }
+    @GetMapping("/findsc/{sid}/{cno}")
+    public boolean findsc (@PathVariable Integer sid,
+                   @PathVariable Integer cno){
+        return studentCourseService.findsc(sid,cno);
+    }
 
     @GetMapping("/deleteById/{sid}/{cid}/{tid}/{term}")
     public boolean deleteById(@PathVariable Integer sid,

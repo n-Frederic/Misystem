@@ -37,10 +37,12 @@ public interface CourseTeacherMapper {
      */
     CourseTeacher findByCno(@Param("cno") Integer cno);
 
+    CourseTeacher findByCid(@Param("cid") Integer cid);
+
     /**
      * 根据条件查询开课记录
      */
-    List<CourseTeacher> findBySearch(@Param("cno") Integer cno,
+    List<CourseTeacher> findBySearch(@Param("cid") Integer cid,
                                      @Param("tid") Integer tid,
                                      @Param("term") String term);
 

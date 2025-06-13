@@ -76,12 +76,15 @@ export default {
       })
     },
     offer(row) {
+
+        console.log("点击了开设按钮，收到 row：", row);  // <-- 添加这一行
+
       const tid = sessionStorage.getItem("tid")
-      const cno = row.cno
+      const cid = row.cid
       const term = sessionStorage.getItem("currentTerm")
 
       const that = this
-      axios.get('http://localhost:10086/courseTeacher/insert/' + cno + '/' + tid + '/' + term).then(function (resp) {
+      axios.get('http://localhost:10086/courseTeacher/insert/' + cid + '/' + tid + '/' + term).then(function (resp) {
         if (resp.data === true) {
           that.$message({
             showClose: true,
