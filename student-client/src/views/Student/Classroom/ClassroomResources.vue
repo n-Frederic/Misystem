@@ -337,9 +337,15 @@ export default {
 
             // 检查考试占用
             const isExamOccupied = examData.value.some(item => {
+                // **新增安全检查：确保 item 存在且其属性存在**
+                if (!item || item.location === undefined || item.day === undefined || item.period === undefined) {
+                    console.warn('考试数据中存在不完整的项:', item); // 记录下不完整的项
+                    return false; // 如果 item 或其关键属性缺失，则跳过此项
+                }
+
                 // 根据您提供的后端返回格式 {location:YF409, day:2025-06-14T16:00:00.000+00:00, period:4}
                 // 从后端返回的 item.day (例如 "2025-06-14T16:00:00.000+00:00") 中提取日期部分
-                const itemDayFormatted = item.day ? String(item.day).substring(0, 10) : ''; // 确保 item.day 是字符串，然后提取 "YYYY-MM-DD"
+                const itemDayFormatted = String(item.day).substring(0, 10); // 确保 item.day 是字符串，然后提取 "YYYY-MM-DD"
 
                 return String(item.location) === location &&
                     itemDayFormatted === formattedDate && // 使用提取出的日期部分进行匹配
@@ -350,6 +356,11 @@ export default {
             let isCourseOccupied = false;
             if (currentWeekIndex.value + 1 <= 16) {
                 isCourseOccupied = courseData.value.some(item => {
+                    // **新增安全检查：确保 item 存在且其属性存在**
+                    if (!item || item.location === undefined || item.day === undefined || item.period === undefined) {
+                        console.warn('课程数据中存在不完整的项:', item); // 记录下不完整的项
+                        return false; // 如果 item 或其关键属性缺失，则跳过此项
+                    }
                     return String(item.location) === location &&
                         item.day === dayNumber &&
                         item.period === period;
