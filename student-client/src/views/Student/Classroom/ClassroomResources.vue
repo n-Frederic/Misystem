@@ -136,7 +136,7 @@ export default {
 
         // --- 教学楼分页 ---
         const totalFloors = ref(6);
-        const classroomsPerFloor = 10;
+        const classroomsPerFloor = 12;
         const currentFloorPage = ref(1);
         const pageSize = ref(classroomsPerFloor);
         const jumperPage = ref(1);
