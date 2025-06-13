@@ -61,6 +61,11 @@ public class CourseTeacherService {
         return courseTeacherMapper.findByCno(cno);
     }
 
+    public CourseTeacher findByCid(Integer cid) {
+        return courseTeacherMapper.findByCid(cid);
+    }
+
+
     /**
      * 查询教师在指定学期的课程
      * @param tid 教师ID
