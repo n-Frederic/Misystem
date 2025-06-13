@@ -35,6 +35,11 @@
         DELETE FROM exam
         WHERE cno = #{cno}
     </delete>
+    <!-- 根据课程号删除信息 -->
+    <delete id="deletegrade">
+        UPDATE  sc SET studentms.sc.daily_grade=NULL
+        WHERE sid=#{sid} AND cno = #{cno}
+    </delete>
 
     <!-- 插入考试信息 -->
     <insert id="insertExam" >
