@@ -5,22 +5,15 @@
                 <el-card>
                     <el-form :inline="true" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="120px" class="demo-ruleForm">
                         <!-- 课程查询字段 -->
-                        <el-form-item label="课程号" prop="cno">
+                        <el-form-item label="课程编号" prop="cno">
                             <el-input v-model.number="ruleForm.cno"></el-input>
                         </el-form-item>
-                        <el-form-item label="课程名" prop="cname">
+                        <el-form-item label="课程名称" prop="cname">
                             <el-input v-model="ruleForm.cname"></el-input>
                         </el-form-item>
                         <el-form-item label="课程模糊查询" prop="cFuzzy">
                             <el-switch v-model="ruleForm.cFuzzy"></el-switch>
                         </el-form-item>
-                        <el-form-item label="学分下限" prop="lowBound">
-                            <el-input v-model.number="ruleForm.lowBound"></el-input>
-                        </el-form-item>
-                        <el-form-item label="学分上限" prop="highBound">
-                            <el-input v-model.number="ruleForm.highBound"></el-input>
-                        </el-form-item>
-
                         <el-form-item label="教师名" prop="tname">
                             <el-input v-model="ruleForm.tname"></el-input>
                         </el-form-item>

@@ -9,12 +9,12 @@
             <el-table-column
                     fixed
                     prop="cno"
-                    label="课号"
+                    label="课程编号"
                     width="150">
             </el-table-column>
             <el-table-column
                     prop="cname"
-                    label="课程号"
+                    label="课程名称"
                     width="150">
             </el-table-column>
             <el-table-column
