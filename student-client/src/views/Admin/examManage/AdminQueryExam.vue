@@ -107,7 +107,7 @@ export default {
         },
         deleteExam(row) {
             const that = this;
-            axios.get('http://localhost:10086/exams/deleteById/' + row.cno).then(function (resp) {
+            axios.get('http://localhost:10086/exams/deletegrade/' + row.sid+'/'+row.cno).then(function (resp) {
                 if (resp.data === true) {
                     that.$message({
                         showClose: true,

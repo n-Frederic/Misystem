@@ -39,6 +39,12 @@ public class ExamController {
         List<Exam> exams = examService.findTeacherExam(tid,term);
         return exams;
     }
+    @GetMapping("/deletegrade/{sid}/{cno}")
+    public boolean deletegrade(@PathVariable Integer sid, @PathVariable  Integer cno){
+        System.out.println("delete sid"+sid+"cno"+ cno);
+        boolean result=examService.deletegrade(sid,cno);
+        return result;
+    }
     @GetMapping("/deleteById/{cno}")
     public boolean deleteById(@PathVariable Integer cno) {  // 或 Integer cno，取决于cno的类型
         try {
