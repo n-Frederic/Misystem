@@ -103,7 +103,7 @@ export default {
           let totalScore = 0
           for (let i = 0; i < that.total; i++) {
             totalScore += that.tmpList[i].ccredit
-            that.avg += that.tmpList[i].ccredit * that.tmpList[i].grade
+            that.avg += that.tmpList[i].ccredit * that.tmpList[i].daily_grade
           }
           if (totalScore === 0)
             that.avg = 0

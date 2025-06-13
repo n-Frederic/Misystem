@@ -1,5 +1,6 @@
 package com.auggie.student_server.controller;
 
+import com.auggie.student_server.entity.CTinfo;
 import com.auggie.student_server.entity.CourseTeacherInfo;
 import com.auggie.student_server.entity.ScInfo;
 import com.auggie.student_server.entity.StudentCourse;
@@ -28,7 +29,7 @@ public class SCcontroller {
 
 
     @GetMapping("/findBySid/{sid}/{term}")
-    public List<CourseTeacherInfo> findBySid(@PathVariable Integer sid, @PathVariable String term) {
+    public List<CTinfo> findBySid(@PathVariable Integer sid, @PathVariable String term) {
         return studentCourseService.findBySid(sid, term);
     }
 

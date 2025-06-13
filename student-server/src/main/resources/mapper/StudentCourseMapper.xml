@@ -3,8 +3,8 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auggie.student_server.mapper.StudentCourseMapper">
-    <select id="findByStudentId" resultType="CourseTeacherInfo">
-        SELECT ct.cno,c.cid, c.cname, t.tid, t.tname, sc.daily_grade, c.ccredit
+    <select id="findByStudentId" resultType="CTinfo">
+        SELECT ct.cno,c.cname,t.tid, t.tname, c.ccredit,sc.daily_grade
         FROM studentms.sc sc
                  INNER JOIN studentms.s s ON sc.sid = s.sid
                  INNER JOIN studentms.ct ct ON sc.cno = ct.cno

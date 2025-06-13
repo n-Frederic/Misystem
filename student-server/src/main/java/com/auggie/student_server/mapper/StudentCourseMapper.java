@@ -1,8 +1,6 @@
 package com.auggie.student_server.mapper;
 
-import com.auggie.student_server.entity.CourseTeacherInfo;
-import com.auggie.student_server.entity.ScInfo;
-import com.auggie.student_server.entity.StudentCourse;
+import com.auggie.student_server.entity.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +22,7 @@ import java.util.Map;
 @Repository
 public interface StudentCourseMapper {
 
-    public  List<CourseTeacherInfo> findByStudentId(@Param("sid") Integer sid,@Param("term") String term);
+    public  List<CTinfo> findByStudentId(@Param("sid") Integer sid, @Param("term") String term);
 
     @Select("SELECT DISTINCT sc.term FROM studentms.sc sc")
     public  List<String> findAllTerm();

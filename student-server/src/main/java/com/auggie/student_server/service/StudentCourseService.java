@@ -1,5 +1,6 @@
 package com.auggie.student_server.service;
 
+import com.auggie.student_server.entity.CTinfo;
 import com.auggie.student_server.entity.CourseTeacherInfo;
 import com.auggie.student_server.entity.ScInfo;
 import com.auggie.student_server.entity.StudentCourse;
@@ -16,7 +17,7 @@ public class StudentCourseService {
     @Autowired
     private StudentCourseMapper studentCourseMapper;
 
-    public List<CourseTeacherInfo> findBySid(Integer sid, String term) {
+    public List<CTinfo> findBySid(Integer sid, String term) {
         return studentCourseMapper.findByStudentId(sid,term);
     }
 
