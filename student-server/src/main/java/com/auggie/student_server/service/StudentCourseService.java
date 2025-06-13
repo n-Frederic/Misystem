@@ -21,6 +21,10 @@ public class StudentCourseService {
         return studentCourseMapper.findByStudentId(sid,term);
     }
 
+    public boolean findsc(Integer sid,Integer cno){
+        return studentCourseMapper.findsc(sid,cno);
+    }
+
 
     public List<String> findAllTerm(){
         return studentCourseMapper.findAllTerm();
