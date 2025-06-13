@@ -39,9 +39,11 @@ public class CourseController {
     }
 
     @PostMapping("/updateCourse")
-    public boolean updateCourse(@RequestBody Course course) {
-        System.out.println("正在修改课程: " + course);
-        return courseService.updateById(course);
+    public boolean updateCourse(@RequestParam String cname,
+                                @RequestParam Integer ccredit) {
+        System.out.println("正在修改课程: " );
+
+        return courseService.updateById(cname,ccredit);
     }
 
     @GetMapping("/getAllCourses")

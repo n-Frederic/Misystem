@@ -35,32 +35,44 @@ export default {
     };
   },
   methods: {
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          // 通过前端校验
-          const that = this
-          // console.log(this.ruleForm)
+      submitForm(formName) {
+          this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  const that = this
+                  console.log("提交数据:", {
+                      cname: this.ruleForm.cname,
+                      ccredit: this.ruleForm.ccredit
+                  })
 
-          axios.post("http://localhost:10086/course/save", this.ruleForm).then(function (resp) {
-            console.log(resp)
-            if (resp.data === true) {
-              that.$message({
-                showClose: true,
-                message: '插入成功',
-                type: 'success'
-              });
-            }
-            else {
-              that.$message.error('插入失败，请检查数据库t');
-            }
-            that.$router.push("/queryCourse")
-          })
-        } else {
-          return false;
-        }
-      });
-    },
+                  // 方案一：使用URLSearchParams
+                  const params = new URLSearchParams()
+                  params.append('cname', this.ruleForm.cname)
+                  params.append('ccredit', this.ruleForm.ccredit)
+
+                  axios.post("http://localhost:10086/course/updateCourse", params, {
+                      headers: {
+                          'Content-Type': 'application/x-www-form-urlencoded'
+                      }
+                  }).then(function (resp) {
+                      if (resp.data === true) {
+                          that.$message({
+                              showClose: true,
+                              message: '编辑成功',
+                              type: 'success'
+                          });
+                      } else {
+                          that.$message.error('编辑失败，请检查数据库');
+                      }
+                      that.$router.push("/queryCourse")
+                  }).catch(function (error) {
+                      console.error("提交失败:", error)
+                      that.$message.error('提交失败，请检查网络连接');
+                  })
+              } else {
+                  return false;
+              }
+          });
+      },
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },

@@ -21,7 +21,8 @@ public interface CourseMapper {
     public boolean insertCourse(@Param("course") Course course);
 
 //    update
-    public boolean updateById(@Param("course") Course course);
+    public boolean updateById(@Param("cname") String cname,
+                             @Param("ccredit") Integer ccredit);
 
 //    delete
     public boolean deleteById(@Param("cid") Integer cid);
