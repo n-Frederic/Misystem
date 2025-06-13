@@ -24,7 +24,7 @@ public interface StudentCourseMapper {
 
     public  List<CTinfo> findByStudentId(@Param("sid") Integer sid, @Param("term") String term);
 
-    public boolean findsc(@Param("sid")Integer sid,@Param("cno")Integer cno);
+    public int findsc(@Param("cno")Integer cno);
     @Select("SELECT DISTINCT sc.term FROM studentms.sc sc")
     public  List<String> findAllTerm();
 

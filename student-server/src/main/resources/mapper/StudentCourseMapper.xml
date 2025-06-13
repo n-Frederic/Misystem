@@ -13,13 +13,12 @@
         WHERE sc.sid = #{sid} AND sc.term = #{term}
     </select>
 
-    <select id="findsc">
-
-            SELECT COUNT(*) > 0
-            FROM studentms.sc sc
-            WHERE sc.sid = #{sid} AND sc.cno = #{cno} AND sc.daily_grade IS NOT NULL
-
+    <select id="findsc" resultType="int" parameterType="int">
+        SELECT COUNT(*)
+        FROM studentms.sc sc
+        WHERE sc.cno = #{cno} AND sc.daily_grade IS NOT NULL
     </select>
+
 
     <select id="findBySearch" resultType="scInfo">
         SELECT ct.cno,s.sid,c.cname,  t.tname, s.sname, sc.daily_grade, sc.term

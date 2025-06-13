@@ -89,26 +89,44 @@ export default {
             })
 
         },
-        deleteCourseTeacher(row) {
-            const that = this
+      deleteCourseTeacher(row) {
+        const that = this;
+        const params = {
+          cno: row.cno
+        };
+
+        axios.get(`http://localhost:10086/SC/findsc/${params.cno}`).then(function(resp) {
+          if (resp.data === true) {
+            that.$alert('该门课已经有成绩录入，不能删除', '提示', {
+              confirmButtonText: '确定',
+              type: 'warning',
+            });
+          } else {
             axios.post('http://localhost:10086/courseTeacher/deleteById', row).then(function (resp) {
-                if (resp.data === true) {
-                    that.$message({
-                        showClose: true,
-                        message: '删除成功',
-                        type: 'success'
-                    });
-                    window.location.reload()
-                }
-                else {
-                    that.$message({
-                        showClose: true,
-                        message: '删除出错，请查询数据库连接',
-                        type: 'error'
-                    });
-                }
-            })
-        },
+              if (resp.data === true) {
+                that.$message({
+                  showClose: true,
+                  message: '删除成功',
+                  type: 'success'
+                });
+                window.location.reload();
+              } else {
+                that.$message({
+                  showClose: true,
+                  message: '删除出错，请查询数据库连接',
+                  type: 'error'
+                });
+              }
+            });
+          }
+        }).catch(function(err) {
+          that.$message({
+            showClose: true,
+            message: '查询成绩状态失败，请稍后重试',
+            type: 'error'
+          });
+        });
+      },
         changePage(page) {
             page = page - 1
             const that = this

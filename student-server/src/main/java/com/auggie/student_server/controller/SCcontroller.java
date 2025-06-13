@@ -1,7 +1,6 @@
 package com.auggie.student_server.controller;
 
 import com.auggie.student_server.entity.CTinfo;
-import com.auggie.student_server.entity.CourseTeacherInfo;
 import com.auggie.student_server.entity.ScInfo;
 import com.auggie.student_server.entity.StudentCourse;
 import com.auggie.student_server.service.StudentCourseService;
@@ -67,10 +66,10 @@ public class SCcontroller {
         System.out.println("sid+"+sid+"cno"+cno+"term"+term+"grade"+grade);
         return studentCourseService.updateById(sid, cno,  term, grade);
     }
-    @GetMapping("/findsc/{sid}/{cno}")
-    public boolean findsc (@PathVariable Integer sid,
-                   @PathVariable Integer cno){
-        return studentCourseService.findsc(sid,cno);
+    @GetMapping("/findsc/{cno}")
+    public boolean findByCno(@PathVariable Integer cno){
+        System.out.println("wuwuuwuwuwuw");
+        return studentCourseService.findsc(cno);
     }
 
     @GetMapping("/deleteById/{sid}/{cid}/{tid}/{term}")
