@@ -20,19 +20,17 @@ public class CourseTeacherController {
 
     /**
      * 插入新的开课记录
-     * @param cno 开课编号
      * @param cid 课程ID
      * @param tid 教师ID
      * @param term 学期
      * @return 是否插入成功
      */
-    @GetMapping("/insert/{cno}/{cid}/{tid}/{term}")
-    public boolean insert(@PathVariable Integer cno,
-                          @PathVariable Integer cid,
+    @GetMapping("/insert/{cid}/{tid}/{term}")
+    public boolean insert(@PathVariable Integer cid,
                           @PathVariable Integer tid,
                           @PathVariable String term) {
-        // 检查是否已存在相同的开课记录
-        if (courseTeacherService.findByCno(cno) != null) {
+        // 检查是否已存在相同开课记录
+        if (courseTeacherService.findByCno(cid) != null) {
             return false; // cno已存在
         }
 
@@ -41,7 +39,7 @@ public class CourseTeacherController {
             return false; // 已存在相同的课程-教师-学期组合
         }
 
-        return courseTeacherService.insertCourseTeacher(cno, cid, tid, term);
+        return courseTeacherService.insertCourseTeacher(cid, tid, term);
     }
 
     /**

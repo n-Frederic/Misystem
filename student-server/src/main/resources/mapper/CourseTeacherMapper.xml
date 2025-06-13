@@ -23,6 +23,10 @@
         SELECT cno, cid, tid, term FROM studentms.ct WHERE cno = #{cno}
     </select>
 
+    <select id="findByCid" resultType="CourseTeacher">
+        SELECT cno, cid, tid, term FROM studentms.ct WHERE cid = #{cid}
+    </select>
+
     <!-- 根据条件查询开课记录 -->
     <select id="findBySearch" resultType="CourseTeacher">
         SELECT cno, cid, tid, term FROM studentms.ct
