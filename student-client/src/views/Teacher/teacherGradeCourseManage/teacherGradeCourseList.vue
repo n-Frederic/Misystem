@@ -16,6 +16,12 @@
           label="课程名"
           width="150">
       </el-table-column>
+
+      <el-table-column
+          prop="tname"
+          label="教师名"
+          width="100">
+      </el-table-column>
       <el-table-column
           fixed
           prop="sid"
@@ -41,13 +47,20 @@
           label="操作"
           width="100">
         <template slot-scope="scope">
+          <el-popconfirm
+              confirm-button-text='删除'
+              cancel-button-text='取消'
+              icon="el-icon-info"
+              icon-color="red"
+              title="删除不可复原"
+              @confirm="deleteTeacher(scope.row)"
+          >
+            <el-button slot="reference" type="text" size="small">删除</el-button>
+          </el-popconfirm>
           <el-button @click="editor(scope.row)" type="text" size="small">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <p>
-      平均成绩：{{ avg }}
-    </p>
     <el-pagination
         background
         layout="prev, pager, next"
@@ -65,6 +78,38 @@ export default {
     select(row) {
       console.log(row)
     },
+    deleteTeacher(row) {
+      const that = this
+      console.log(row)
+      const sid = row.sid
+      const cno = row.cno
+      // const tid = row.tid
+      const term = row.term
+      axios.get("http://localhost:10086/SC/deleteById/" + sid + '/' + cno + '/' + tid + '/' + term).then(function (resp) {
+        console.log(resp)
+        if (resp.data === true) {
+          that.$message({
+            showClose: true,
+            message: '删除成功',
+            type: 'success'
+          });
+          window.location.reload()
+        }
+        else {
+          that.$message({
+            showClose: true,
+            message: '删除出错，请查询数据库连接',
+            type: 'error'
+          });
+        }
+      }).catch(function (error) {
+        that.$message({
+          showClose: true,
+          message: '删除出错，存在外键依赖',
+          type: 'error'
+        });
+      })
+    },
     changePage(page) {
       page = page - 1
       const that = this
@@ -77,10 +122,13 @@ export default {
       this.$router.push({
         path: '/editorGradeCourse',
         query: {
-          cid: row.cid,
-          tid: row.tid,
+          cno: row.cno,
+          // tid: row.tid,
           sid: row.sid,
-          term: row.term
+          term: row.term,
+          cname: row.cname,
+          tname: row.tname,
+          sname: row.sname
         }
       })
     }
@@ -91,7 +139,6 @@ export default {
       pageSize: 10,
       total: null,
       tmpList: null,
-      avg: 0,
     }
   },
   props: {
@@ -115,12 +162,6 @@ export default {
           let length = that.tmpList.length
           let ans = (end < length) ? end : length
           that.tableData = that.tmpList.slice(start, ans)
-
-          for (let i = 0; i < that.tmpList.length; i++) {
-            that.avg += that.tmpList[i].grade
-          }
-          that.avg /= that.total
-          console.log('avg', that.avg)
         })
       },
       deep: true,
