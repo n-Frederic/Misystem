@@ -67,8 +67,9 @@ public class CourseService {
         return findBySearch(map);
     }
 
-    public boolean updateById(Course course) {
-        return courseMapper.updateById(course);
+    public boolean updateById(String cname,
+                             Integer ccredit) {
+        return courseMapper.updateById(cname,ccredit);
     }
 
     public boolean insertCourse(Course course) {

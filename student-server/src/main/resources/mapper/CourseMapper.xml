@@ -34,14 +34,16 @@
         FROM studentms.ct
     </select>
 
-    <update id="updateById">
-        UPDATE studentms.c
-        SET cname = #{course.cname},
-            ccredit = #{course.ccredit}
 
-        WHERE cid = #{course.cid}
-    </update>
 
+    <insert id="updateById">
+        INSERT INTO studentms.c (cid, cname, ccredit)
+        VALUES (
+                       (SELECT IFNULL(MAX(cid), 0) + 1 FROM studentms.c c2),
+                       #{cname},
+                       #{ccredit}
+               )
+    </insert>
 
     <insert id="insertCourse">
         INSERT INTO studentms.c (cname, ccredit)
